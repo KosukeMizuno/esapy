@@ -5,10 +5,12 @@ description = ""
 authors = ["Kosuke Mizuno (WSL, Lab PC) <mizuno.k.ae@m.titech.ac.jp>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3"
+pyyaml = "*"
+requests = "*"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+
 
 [build-system]
 requires = ["poetry>=0.12"]

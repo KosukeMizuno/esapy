@@ -1,2 +1,6 @@
 #gitignore
 /.venv/
+/src/*.egg-info/
+/.vscode/
+
+/trial/
