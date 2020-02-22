@@ -5,7 +5,7 @@
 # 
 /dist/
 /src/*.egg-info/
-/src/esa_python/__pycache__/
+/src/esapy/__pycache__/
 
 # trial code
 /trial/

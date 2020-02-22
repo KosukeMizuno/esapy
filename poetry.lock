@@ -1,4 +1,15 @@
 [[package]]
+category = "dev"
+description = "A tool that automatically formats Python code to conform to the PEP 8 style guide"
+name = "autopep8"
+optional = false
+python-versions = "*"
+version = "1.4.4"
+
+[package.dependencies]
+pycodestyle = ">=2.4.0"
+
+[[package]]
 category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
@@ -21,6 +32,14 @@ name = "idna"
 optional = false
 python-versions = "*"
 version = "2.6"
+
+[[package]]
+category = "dev"
+description = "Python style guide checker"
+name = "pycodestyle"
+optional = false
+python-versions = "*"
+version = "2.4.0"
 
 [[package]]
 category = "main"
@@ -61,10 +80,13 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [metadata]
-content-hash = "b4e3409f9ac66439242f0efaadca41886fe4042bf4d6f8d3ff4ed9d627f33e61"
+content-hash = "6e3c1b1a42fb93e63e88b755b9ef4cbea6925a3cdd9b059b4b782d01cd007a3c"
 python-versions = "^3"
 
 [metadata.files]
+autopep8 = [
+    {file = "autopep8-1.4.4.tar.gz", hash = "sha256:4d8eec30cc81bc5617dbf1218201d770dc35629363547f17577c61683ccfb3ee"},
+]
 certifi = [
     {file = "certifi-2019.11.28-py2.py3-none-any.whl", hash = "sha256:017c25db2a153ce562900032d5bc68e9f191e44e9a0f762f373977de9df1fbb3"},
     {file = "certifi-2019.11.28.tar.gz", hash = "sha256:25b64c7da4cd7479594d035c08c2d809eb4aab3a26e5a990ea98cc450c320f1f"},
@@ -76,6 +98,11 @@ chardet = [
 idna = [
     {file = "idna-2.6-py2.py3-none-any.whl", hash = "sha256:8c7309c718f94b3a625cb648ace320157ad16ff131ae0af362c9f21b80ef6ec4"},
     {file = "idna-2.6.tar.gz", hash = "sha256:2c6a5de3089009e3da7c5dde64a141dbc8551d5b7f6cf4ed7c2568d0cc520a8f"},
+]
+pycodestyle = [
+    {file = "pycodestyle-2.4.0-py2.py3-none-any.whl", hash = "sha256:cbc619d09254895b0d12c2c691e237b2e91e9b2ecf5e84c26b35400f93dcfb83"},
+    {file = "pycodestyle-2.4.0-py3.6.egg", hash = "sha256:74abc4e221d393ea5ce1f129ea6903209940c1ecd29e002e8c6933c2b21026e0"},
+    {file = "pycodestyle-2.4.0.tar.gz", hash = "sha256:cbfca99bd594a10f674d0cd97a3d802a1fdef635d4361e1a2658de47ed261e3a"},
 ]
 pyyaml = [
     {file = "PyYAML-3.13-cp27-cp27m-win32.whl", hash = "sha256:d5eef459e30b09f5a098b9cea68bebfeb268697f78d647bd255a085371ac7f3f"},
