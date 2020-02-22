@@ -2,10 +2,12 @@
 
 import sys
 import os
+import re
 import subprocess
 from pathlib import Path
 import tempfile
 import mimetypes
+from urllib.parse import quote
 
 
 import yaml
@@ -27,7 +29,7 @@ def main():
     pass
 
 
-def upload_ipynb(filename, outputname, *, logger=None):
+def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=None):
     logger = logger or default_logger
     # ファイルパスの確認
     # 一時フォルダを確保
@@ -47,39 +49,78 @@ def upload_ipynb(filename, outputname, *, logger=None):
 
     ####
     with tempfile.TemporaryDirectory() as dname:
-        path_tmpdir = Path(dname)
-        logger.info('temporary directory: %s' % str(path_tmpdir))
+        # set working directory
+        if use_tmp_folder:
+            logger.info('temporary directory: %s' % str(dname))
+            path_wd = Path(dname)
+        else:
+            path_wd = path_ipynb.parent
 
         # process
-        subprocess.check_call(['jupyter', 'nbconvert',
-                               '--to=markdown',
-                               '--output-dir=%s' % str(path_tmpdir),
-                               '%s' % str(path_ipynb)
-                               ])
+        logger.info('calling nbconvert')
+        cmd = ['jupyter', 'nbconvert',
+               '--to=markdown']
 
-        path_md = path_tmpdir / (path_ipynb.stem + '.md')
-        path_list_img = list(path_tmpdir.glob('**/*.png'))
+        cmd.append('--output-dir=%s' % str(path_wd))
+        cmd.append(str(path_ipynb))
+        subprocess.check_call(cmd)
+
+        path_md = path_wd / (path_ipynb.stem + '.md')
+        path_list_img = list(path_wd.glob('%s_files/*.png' % path_ipynb.stem))
+
         logger.info('generated markdown: %s' % str(path_md))
-        logger.info('generated images:')
+        logger.info('%d images were generated:' % len(path_list_img))
         for p in path_list_img:
-            logger.info('  %s' % str(path_md))
+            logger.info('  %s' % str(p))
 
-        # upload images
-        pass
+        # upload images & make replace list
+        logger.info('uploading images...')
+        replace_list = []  # png filename, path obj, url
+        for p in path_list_img:
+            url = upload_binary(p, token=token, team=team)
+            # import uuid  # テスト用
+            # url = str(uuid.uuid4())  # テスト用
+            replace_list.append((quote(p.stem), p, url))
+        replace_list_index = [x[0] for x in replace_list]
+        for fn, p, url in replace_list:
+            logger.info('  %s -> %s' % (fn, url))
+        logger.info('%d files were uploaded.' % len(replace_list))
 
         # replace image url
-        pass
+        # example ==> '![png](gaussian%20beam_files/gaussian%20beam_10_0.png)\n'
+        logger.info('replacing image urls...')
+        md_body = path_md.open('r').readlines()
+        md_body_replaced = []
+        n = 0
+        for i, l in enumerate(md_body):
+            if not (l[0] == '!'):
+                md_body_replaced.append(l)
+                continue
+
+            m = re.match(r'!\[(.+)\]\((.+)/(.+)(\..+)\)\n', l)
+            if m is not None:
+                logger.info('line %d, "%s"' % (i, l.strip()))
+
+                # find url
+                fn = m.group(3)
+                url = replace_list[replace_list_index.index(fn)][2]
+
+                # replace
+                _l = '![%s](%s)\n' % (m.group(3), url)
+                md_body_replaced.append(_l)
+                n += 1
+                logger.info('       -> "%s"' % _l.strip())
+        logger.info('%d urls were replaced.' % n)
 
         # replace math codeblock
         pass
 
-        # upload markdown
-        pass
+        # upload markdownw
+        path_md.open('w').writelines(md_body_replaced)
+        logger.info('markdown file with replaced image-urls was generated.')
 
-    logger.info('ending esapy#upload')
 
-
-def upload_md(filename, token, team, *, name=None, tags=None, category=None, wip=True, message=None, logger=None):
+def upload_md(filename, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, logger=None):
     """This function doesn't work.
 
     'URI too Large' ocurred.
@@ -110,7 +151,7 @@ def upload_md(filename, token, team, *, name=None, tags=None, category=None, wip
     return res
 
 
-def upload_binary(filename, token, team, *, logger=None):
+def upload_binary(filename, token=None, team=None, logger=None):
     logger = logger or default_logger
 
     path_bin = Path(filename)
