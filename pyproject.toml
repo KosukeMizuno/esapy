@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "esapy"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
 description = "A python implementation of esa.io API"
 readme = "README.md"
 license = "MIT"
+homepage = "https://github.com/KosukeMizuno/esapy"
 
 exclude = ["trial/*"]
 

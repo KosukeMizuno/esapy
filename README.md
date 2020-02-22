@@ -24,7 +24,7 @@ The main purpose of this package is implementation of easy uploading and sharing
 
 1. generate esa.io token with read/write permission.
 
-1. make configuration file in your home directory.
+1. make configuration file in your home directory (~/.esapyrc).
 
     ```YAML: ~/.esapyrc
     token: your_token

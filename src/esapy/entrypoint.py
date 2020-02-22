@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 from .loadrc import get_token_and_team
+from .upload import upload_ipynb
 
 
 def main():
