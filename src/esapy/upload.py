@@ -97,7 +97,7 @@ def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=N
         # replace image url
         # example ==> '![png](gaussian%20beam_files/gaussian%20beam_10_0.png)\n'
         logger.info('replacing image urls...')
-        md_body = path_md.open('r').readlines()
+        md_body = path_md.open('r', encoding='utf-8').readlines()
         md_body_replaced = []
         n = 0
         for i, l in enumerate(md_body):
@@ -124,7 +124,7 @@ def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=N
         pass
 
         # upload markdownw
-        path_md.open('w').writelines(md_body_replaced)
+        path_md.open('w', encoding='utf-8').writelines(md_body_replaced)
         logger.info('markdown file with replaced image-urls was generated.')
 
 
@@ -138,7 +138,7 @@ def upload_md(filename, token=None, team=None, name=None, tags=None, category=No
     path_md = Path(filename)
     logger.info('uploading markdown, %s' % str(path_md))
 
-    md = path_md.open('r').read()
+    md = path_md.open('r', encoding='utf-8').read()
 
     # post
     url = 'https://api.esa.io/v1/teams/%s/posts' % team
