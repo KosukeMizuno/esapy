@@ -10,7 +10,8 @@ The main purpose of this package is implementation of easy uploading and sharing
 INSTALATION
 -----------
 
-TBW
+    | sudo apt install pandoc
+    | pip install esapy
 
 
 
