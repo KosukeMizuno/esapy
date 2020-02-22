@@ -25,19 +25,29 @@ default_logger.propagate = False
 default_logger.debug('esapy.upload loaded.')
 
 
-def main():
-    pass
-
-
 def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=None):
+    """
+    1) Convert ipynb file to markdown and generate images.
+    2) Upload images.
+    3) Generate markdown with uploaded-urls.
+
+    4*) Replace latex code blocks ($$~$$) to math code blocks (```math ~ ```).
+    5*) Upload markdown as a new post.
+    Stared features have not been implemented.
+
+    Parameters
+    ----------
+    filename: str
+        filename of the target jpyter notebook (.ipynb).
+    token: str
+        access token of esa.io
+    team: str
+        name of your team
+    use_temp_folder: bool, dafult=False
+        If False, .md file and images will be generated at same place of the target ipynb file.
+
+    """
     logger = logger or default_logger
-    # ファイルパスの確認
-    # 一時フォルダを確保
-    # jupyter nbconvert で mdとpng生成
-    # pngをアップロードし、アドレスを取得
-    # md中の画像アドレスをアップロードしたものに置き換え
-    # 数式環境$$ ~ $$ を mathコードブロックに置き換え
-    # mdをアップロードする
 
     path_ipynb = Path(filename)
     logger.info('starting esapy#upload')
@@ -192,5 +202,4 @@ def upload_binary(filename, token=None, team=None, logger=None):
 
 
 if __name__ == '__main__':
-    main()
-
+    pass
