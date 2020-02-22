@@ -3,20 +3,21 @@ name = "esapy"
 version = "0.1.0"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
 description = "A python implementation of esa.io API"
-readme = "README.rst"
+readme = "README.md"
 license = "MIT"
 
 exclude = ["trial/*"]
 
 
 [tool.poetry.scripts]
-esa-up = "esapy.upload:main"
-jupyter-esa-up = "esapy.upload:main"
+esa-up = "esapy.entrypoint:main"
+jupyter-esa-up = "esapy.entrypoint:main"
+esa-token = "esapy.loadrc:get_token_and_team"
 
 
 [tool.poetry.dependencies]
 python = "^3.4"
-pyyaml = "*"
+pyyaml = "^5.1"
 requests = "*"
 nbconvert = "*"
 
