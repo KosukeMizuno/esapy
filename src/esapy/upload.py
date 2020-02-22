@@ -27,7 +27,7 @@ def main():
     pass
 
 
-def upload_ipynb(filename, *, logger=None):
+def upload_ipynb(filename, outputname, *, logger=None):
     logger = logger or default_logger
     # ファイルパスの確認
     # 一時フォルダを確保
@@ -79,15 +79,42 @@ def upload_ipynb(filename, *, logger=None):
     logger.info('ending esapy#upload')
 
 
-def upload_md(filename):
+def upload_md(filename, token, team, *, name=None, tags=None, category=None, wip=True, message=None, logger=None):
+    """This function doesn't work.
+
+    'URI too Large' ocurred.
+    """
+    logger = logger or default_logger
+
+    path_md = Path(filename)
+    logger.info('uploading markdown, %s' % str(path_md))
+
+    md = path_md.open('r').read()
+
+    # post
+    url = 'https://api.esa.io/v1/teams/%s/posts' % team
+    header = dict(Authorization='Bearer %s' % token)
+    params = dict(name=name or "",
+                  category=category or "",
+                  message=message or "Upload post.",
+                  body_md=md,
+                  wip=wip)
+    if isinstance(tags, list) and all([isinstance(t, str) for t in tags]):
+        params['tags'] = tags
+
+    res = requests.post(url, headers=header, params=params)
+
+    print(res)
     pass
+
+    return res
 
 
 def upload_binary(filename, token, team, *, logger=None):
     logger = logger or default_logger
 
     path_bin = Path(filename)
-    logger.info('uploading %s' % str(path_bin))
+    logger.info('uploading binary, %s' % str(path_bin))
     logger.info('  filesize: %d' % path_bin.stat().st_size)
 
     # get metadata
