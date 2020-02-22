@@ -1,4 +1,4 @@
-esa-python
+esapy
 ==========
 
 A python implementation of esa.io API

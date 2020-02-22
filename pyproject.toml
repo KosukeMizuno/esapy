@@ -1,8 +1,13 @@
 [tool.poetry]
-name = "esa-python"
+name = "esapy"
 version = "0.1.0"
-description = ""
-authors = ["Kosuke Mizuno (WSL, Lab PC) <mizuno.k.ae@m.titech.ac.jp>"]
+authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
+description = "A python implementation of esa.io API"
+readme = "README.rst"
+license = "MIT"
+
+exclude = ["trial/*"]
+
 
 [tool.poetry.dependencies]
 python = "^3"

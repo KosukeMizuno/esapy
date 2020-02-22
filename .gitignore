@@ -1,6 +1,11 @@
 #gitignore
 /.venv/
-/src/*.egg-info/
 /.vscode/
 
+# 
+/dist/
+/src/*.egg-info/
+/src/esa_python/__pycache__/
+
+# trial code
 /trial/
