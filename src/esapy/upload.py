@@ -9,8 +9,6 @@ import tempfile
 import mimetypes
 from urllib.parse import quote
 
-
-import yaml
 import requests
 
 
