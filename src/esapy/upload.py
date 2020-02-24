@@ -11,6 +11,7 @@ from urllib.parse import quote
 
 import requests
 
+from .clipboard import go_clipboard
 
 # logger
 from logging import getLogger, StreamHandler, DEBUG
@@ -28,9 +29,10 @@ def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=N
     1) Convert ipynb file to markdown and generate images.
     2) Upload images.
     3) Generate markdown with uploaded-urls.
+    4) Copy markdown to clipboard (optional).
 
-    4*) Replace latex code blocks ($$~$$) to math code blocks (```math ~ ```).
-    5*) Upload markdown as a new post.
+    5*) Replace latex code blocks ($$~$$) to math code blocks (```math ~ ```).
+    6*) Upload markdown as a new post.
     Stared features have not been implemented.
 
     Parameters
@@ -122,6 +124,9 @@ def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=N
 
         # replace math codeblock
         pass
+
+        # goto clipboard
+        go_clipboard(md_body_replaced, logger)
 
         # upload markdownw
         path_md.open('w', encoding='utf-8').writelines(md_body_replaced)
