@@ -242,6 +242,14 @@ version = "2.3.1"
 
 [[package]]
 category = "main"
+description = "A cross-platform clipboard module for Python. (Only handles plain text for now.)"
+name = "pyperclip"
+optional = false
+python-versions = "*"
+version = "1.7.0"
+
+[[package]]
+category = "main"
 description = "Persistent/Functional/Immutable data structures"
 name = "pyrsistent"
 optional = false
@@ -355,7 +363,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "c8b92eda46bd12e9c45e07a549ca2b476c81ef28e30f91229a65ebb4552b591d"
+content-hash = "0334ab4374ebd3db7efa14453b6c708ca4e4cb7f582cf7e12c1d157d02009552"
 python-versions = "^3.4"
 
 [metadata.files]
@@ -470,6 +478,9 @@ pycodestyle = [
 pygments = [
     {file = "Pygments-2.3.1-py2.py3-none-any.whl", hash = "sha256:e8218dd399a61674745138520d0d4cf2621d7e032439341bc3f647bff125818d"},
     {file = "Pygments-2.3.1.tar.gz", hash = "sha256:5ffada19f6203563680669ee7f53b64dabbeb100eb51b61996085e99c03b284a"},
+]
+pyperclip = [
+    {file = "pyperclip-1.7.0.tar.gz", hash = "sha256:979325468ccf682104d5dcaf753f869868100631301d3e72f47babdea5700d1c"},
 ]
 pyrsistent = [
     {file = "pyrsistent-0.15.7.tar.gz", hash = "sha256:cdc7b5e3ed77bed61270a47d35434a30617b9becdf2478af76ad2c6ade307280"},
