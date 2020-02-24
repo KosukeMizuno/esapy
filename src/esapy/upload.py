@@ -126,7 +126,7 @@ def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=N
         pass
 
         # goto clipboard
-        go_clipboard(md_body_replaced, logger)
+        go_clipboard(''.join(md_body_replaced), logger)
 
         # upload markdownw
         path_md.open('w', encoding='utf-8').writelines(md_body_replaced)
