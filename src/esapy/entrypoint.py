@@ -21,7 +21,7 @@ def command_up(args):
     # replace
     token, team = get_token_and_team(args)
 
-    _replace(path_input=Path(args.target_md),
+    _replace(path_input=path_md,
              clipboard=args.clipboard,
              token=token, team=team,
              proxy=args.proxy,
@@ -43,7 +43,7 @@ def command_replace(args):
 
 
 def command_publish(args):
-    pass
+    pass  # TODO
 
 
 def command_config(args):
@@ -93,7 +93,6 @@ def main():
     try:
         if args.verbose > 0:
             logger.setLevel(DEBUG)
-            print("@@@@")
     except AttributeError:
         pass
 

@@ -6,16 +6,14 @@ import requests
 
 
 # logger
-from logging import getLogger, StreamHandler, FileHandler, DEBUG
-logger = getLogger(__name__)
-logger.addHandler(StreamHandler())
+from logging import getLogger
 
 
 def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
     if proxy is not None:
         raise RuntimeError('proxy has not yet been implemented.')
 
-    logger = logger or default_logger
+    logger = logger or getLogger(__name__)
 
     path_bin = Path(filename)
     logger.info('uploading binary, %s' % str(path_bin))

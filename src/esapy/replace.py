@@ -24,7 +24,7 @@ def _replace(path_input, clipboard=False, token=None, team=None, proxy=None, log
         md_body_modified = []
 
         for i, l in enumerate(md_body):
-            _l = _replace_line(i, l, token, team, proxy)
+            _l = _replace_line(i, l, token, team, proxy, logger=logger)
             md_body_modified.append(_l)
 
     logger.info('Replace finished.')
@@ -58,16 +58,17 @@ def _replace_line(i, l, token, team, proxy, logger=None):
             logger.info('  images referred via url -> pass, %s' % str(path_img))
             continue
 
+        logger.info('  upload ... %s' % str(path_img))
         p = Path(unquote(path_img))
         try:
-            url = upload_binary(p, token=token, team=team, proxy=proxy)
+            url = upload_binary(p, token=token, team=team, proxy=proxy, logger=logger)
 
         except Exception as e:
             logger.warning(e)
 
         else:
             # upload succeeded.
-            _l = _l[:m.start()] + '![%s](%s)' % (alttext, utl) + _l[m.end():]
+            _l = _l[:m.start()] + '![%s](%s)' % (alttext, url) + _l[m.end():]
 
     return _l
 

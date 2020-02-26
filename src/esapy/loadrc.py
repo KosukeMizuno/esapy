@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 import yaml
 
+from logging import getLogger
+
 
 KEY_TOKEN = 'ESA_PYTHON_TOKEN'
 KEY_TEAM = 'ESA_PYTHON_TEAM'
