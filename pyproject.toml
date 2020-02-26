@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "esapy"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
 description = "A python implementation of esa.io API"
 readme = "README.md"
@@ -11,9 +11,7 @@ exclude = ["trial/*"]
 
 
 [tool.poetry.scripts]
-esa-up = "esapy.entrypoint:main"
-jupyter-esa-up = "esapy.entrypoint:main"
-esa-token = "esapy.loadrc:get_token_and_team"
+esa = 'esapy.entrypoint:main'
 
 
 [tool.poetry.dependencies]
