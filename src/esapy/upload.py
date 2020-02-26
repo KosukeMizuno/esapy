@@ -21,7 +21,6 @@ handler.setLevel(DEBUG)
 default_logger.setLevel(DEBUG)
 default_logger.addHandler(handler)
 default_logger.propagate = False
-default_logger.debug('esapy.upload loaded.')
 
 
 def upload_ipynb(filename, token=None, team=None, use_tmp_folder=False, logger=None):

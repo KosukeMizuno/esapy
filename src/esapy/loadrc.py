@@ -10,6 +10,25 @@ KEY_TEAM = 'ESA_PYTHON_TEAM'
 RCFILE = '.esapyrc'
 
 
+def _show_configuration():
+    path_rc = _get_rcfilepath()
+    print('configuration file, "%s": ' % str(path_rc))
+    try:
+        with path_rc.open('r', encoding='utf-8') as f:
+            ll = f.readlines()
+            ll = ['  ' + l for l in ll]
+            rc_body = ''.join(ll)
+            print(rc_body)
+    except FileNotFoundError as e:
+        print('  rcFile not found.')
+
+    if _load_token_from_environ() is not None:
+        print('environment variables:')
+        print('  %s=%s' % (KEY_TOKEN, os.environ.get(KEY_TOKEN, '')))
+        print('  %s=%s' % (KEY_TEAM, os.environ.get(KEY_TEAM, '')))
+        print('')
+
+
 def get_token_and_team():
     """return tuple (token, team)
     """
@@ -33,9 +52,13 @@ def _load_token_from_environ():
         return None
 
 
-def _load_rcfile():
+def _get_rcfilepath():
     path_rc = Path.home() / RCFILE
-    x = None
+    return path_rc
+
+
+def _load_rcfile():
+    path_rc = _get_rcfilepath()
 
     with path_rc.open('r') as f:
         y = yaml.safe_load(f)

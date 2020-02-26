@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 from pathlib import Path
-from .loadrc import get_token_and_team
+from .loadrc import _show_configuration
 from .upload import upload_ipynb
 
 import argparse
@@ -16,6 +15,14 @@ def command_convert(args):
     pass
 
 
+def _call_converter():
+    # check filepath
+    #  1) ipynb -> nbconvert
+    #  2) latex -> pandoc
+    #  3) markdown -> do nothing
+    pass
+
+
 def command_replace(args):
     pass
 
@@ -25,7 +32,7 @@ def command_publish(args):
 
 
 def command_config(args):
-    pass
+    _show_configuration()
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
@@ -68,9 +75,6 @@ parser_config.set_defaults(handler=command_config)
 def main():
     args = parser.parse_args()
     args.handler(args)
-    args.add_argument('xxx', default='x')
-    print(args.verbose)
-    print(args.xxx)
 
 # def main():
 #     p = Path(sys.argv[1])
