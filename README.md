@@ -53,16 +53,14 @@ The main purpose of this package is implementation of easy uploading and sharing
 
 1. Post a new article by copy-and-paste the generated markdown file.
 
-1. if process fails due to a network problem, you can re-try `esa-up target.md` .  When the input is a markdown, `nbconvert` step will be skipped.
+1. if process fails due to a network problem, you can re-try with `esa up target.md` .  When the input is a markdown, `nbconvert` step will be skipped.
 
 
 ## DOCUMENT
 
 ### commands
 This package registers following cli commands.
-- `esa up [-h] [--clipboard] [--token <esa.io_token>]
-    [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose]
-    <input_filepath>`
+- `esa up [-h] [--clipboard] [--token <esa.io_token>] [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose] <input_filepath>`
   - upload your file
   - supported format: ipynb, tex, and md
   - This command calls `esa convert` and `esa replace` internally
@@ -78,6 +76,7 @@ This package registers following cli commands.
   - subcommand
   - scan lines of markdown finding image tags (`![xxx](yyy)`).
   - when the file path is not url, image file will be uploaded to your team of esa.io.
+  - If token/team are given as arguments and config file simultaneously, arguments are used.
 
 
 
