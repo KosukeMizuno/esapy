@@ -60,10 +60,26 @@ The main purpose of this package is implementation of easy uploading and sharing
 
 ### commands
 This package registers following cli commands.
-- `esa up <target.ipynb>`
-  - upload your notebook
+- `esa up [-h] [--clipboard] [--token <esa.io_token>]
+    [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose]
+    <input_filepath>`
+  - upload your file
+  - supported format: ipynb, tex, and md
+  - This command calls `esa convert` and `esa replace` internally
+
 - `esa config`
   - list environs and config
+
+- `esa convert [-h] [--verbose] <input_filepath>`
+  - subcommand
+  - call nbconvert or pandoc depending input format
+
+- `esa replace [-h] [--clipboard] [--token <esa.io_token>] [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose] <input_filepath markdown file>`
+  - subcommand
+  - scan lines of markdown finding image tags (`![xxx](yyy)`).
+  - when the file path is not url, image file will be uploaded to your team of esa.io.
+
+
 
 ### config file
 The config file (~/.esapyrc) should be written in yaml format.
