@@ -12,8 +12,6 @@ exclude = ["trial/*"]
 
 [tool.poetry.scripts]
 esa = 'esapy.entrypoint:main'
-esa-up = "esapy.entrypoint:main"
-esa-token = "esapy.loadrc:get_token_and_team"
 
 
 [tool.poetry.dependencies]

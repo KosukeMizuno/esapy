@@ -29,10 +29,14 @@ def _show_configuration():
         print('')
 
 
-def get_token_and_team():
+def get_token_and_team(args):
     """return tuple (token, team)
     """
     x = None
+
+    x = _load_token_from_args(args)
+    if x is not None:
+        return x
 
     x = _load_token_from_environ()
     if x is not None:
@@ -43,6 +47,18 @@ def get_token_and_team():
         return x
 
     raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.' % (RCFILE, KEY_TOKEN, KEY_TEAM))
+
+
+def _load_token_from_args(args):
+    try:
+        token, team = args.token, args.team
+    except AttributeError:
+        return None
+
+    if token is not None and team is not None:
+        return token, team
+    else:
+        return None
 
 
 def _load_token_from_environ():
@@ -80,8 +96,4 @@ def _load_token_from_rcfile():
 
 
 if __name__ == '__main__':
-    print(_load_token_from_environ())
-    print(_load_token_from_rcfile())
-
-    print('')
-    print(get_token_and_team())
+    pass
