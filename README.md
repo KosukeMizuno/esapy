@@ -5,6 +5,8 @@ A python implementation of esa.io API
 The main purpose of this package is implementation of easy uploading and sharing jupyter notebook to esa.io service.
 
 
+[![PyPI version](https://badge.fury.io/py/esapy.svg)](https://badge.fury.io/py/esapy) [![Python Versions](https://img.shields.io/pypi/pyversions/esapy.svg)](https://pypi.org/project/esapy/)
+
 
 ## INSTALATION
 
@@ -33,7 +35,7 @@ The main purpose of this package is implementation of easy uploading and sharing
 
     - You can set them as environment variables: ESA_PYTHON_TOKEN, ESA_PYTHON_TEAM.
     - Environment variables are prior to .esapyrc file.
-    - You can check your token using `esa-token`. 
+    - You can check your token using `esa config`. 
 
 
 
@@ -44,24 +46,24 @@ The main purpose of this package is implementation of easy uploading and sharing
 1. Convert to markdown and upload images.
 
     ```shell
-    $ esa-up target.ipynb
+    $ esa up target.ipynb
     ```
 
     This package (for now) will call nbconvert and upload images, and will not upload markdown file as new post.
 
 1. Post a new article by copy-and-paste the generated markdown file.
 
+1. if process fails due to a network problem, you can re-try `esa-up target.md` .  When the input is a markdown, `nbconvert` step will be skipped.
+
 
 ## DOCUMENT
 
 ### commands
 This package registers following cli commands.
-- esa-up <target.ipynb>
+- `esa up <target.ipynb>`
   - upload your notebook
-- jupyter-esa-up <target.ipynb>
-  - an alias of `esa-up`
-- esa-token
-  - show your token and team name
+- `esa config`
+  - list environs and config
 
 ### config file
 The config file (~/.esapyrc) should be written in yaml format.
