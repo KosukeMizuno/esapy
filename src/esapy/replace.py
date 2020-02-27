@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import unquote
 import pyperclip
 
-from .upload import upload_binary
+from .api import upload_binary
 from .loadrc import _load_rcfile
 
 # logger
