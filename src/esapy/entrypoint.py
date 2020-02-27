@@ -18,11 +18,13 @@ logger.addHandler(StreamHandler())
 def command_up(args):
     # convert
     path_md = _call_converter(args, logger=logger)
+    path_wd = path_md.parent
 
     # replace
     token, team = get_token_and_team(args)
 
     body_md = _replace(path_input=path_md,
+                       path_wd=path_wd,
                        clipboard=args.clipboard,
                        token=token, team=team,
                        proxy=args.proxy,
@@ -44,6 +46,7 @@ def command_replace(args):
     token, team = get_token_and_team(args)
 
     _replace(path_input=Path(args.target_md),
+             path_wd=Path(args.target_md).parent,
              clipboard=args.clipboard,
              token=token, team=team,
              proxy=args.proxy,

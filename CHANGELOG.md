@@ -5,14 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 ### TODO
-- support for latex input
+- support for latex input with images
 
-## [0.4.1]
+
+
+## [0.4.2] - 2020-02-27
+### Fixed
+- image upload even when alt-text is ""
+
+## [0.4.1] - 2020-02-27
 ### Fixed
 - support latex input
 
-
-## [0.4.0]
+## [0.4.0] - 2020-02-27
 ### Added
 - proxy setting
 - subcommand
@@ -21,6 +26,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ### Changed
 - automatically publish when `esa up ***.ipynb`
+
 
 
 ## [0.3.0] - 2020-02-27
@@ -41,15 +47,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
   - separete process
   - enable retry
 
+
 ### Removed
 - some command removed.
   - `esa-up`
   - `esa-token`
   - `jupyter esa-up`
 
+
+
 ## [0.2.0] - 2020-02-24
 ### Added
 - Markdown body is copid to clipboard after process.
+
+
 
 ## [0.1.2] - 2020-02-23
 ### Added

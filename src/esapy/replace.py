@@ -13,7 +13,7 @@ from .loadrc import _load_rcfile
 from logging import getLogger
 
 
-def _replace(path_input, clipboard=False, token=None, team=None, proxy=None, logger=None):
+def _replace(path_input, path_wd, clipboard=False, token=None, team=None, proxy=None, logger=None):
     logger = logger or getLogger(__name__)
     logger.info('Replace & upload images in %s' % str(path_input))
 
@@ -24,7 +24,7 @@ def _replace(path_input, clipboard=False, token=None, team=None, proxy=None, log
         md_body_modified = []
 
         for i, l in enumerate(md_body):
-            _l = _replace_line(i, l, token, team, proxy, logger=logger)
+            _l = _replace_line(i, l, path_wd, token, team, proxy, logger=logger)
             md_body_modified.append(_l)
 
     logger.info('Replace finished.')
@@ -39,11 +39,11 @@ def _replace(path_input, clipboard=False, token=None, team=None, proxy=None, log
 
     return ''.join(md_body_modified)
 
-def _replace_line(i, l, token, team, proxy, logger=None):
+def _replace_line(i, l, path_wd, token, team, proxy, logger=None):
     logger = logger or getLogger(__name__)
 
     # find image tags
-    matches = list(re.finditer(r'!\[(.+?)\]\((.+?)\)', l))
+    matches = list(re.finditer(r'!\[(.*?)\]\((.+?)\)', l))
     if len(matches) > 1:
         logger.info('#%d line, %d image tags are found.' % (i, len(matches)))
     elif len(matches) == 1:
@@ -60,7 +60,7 @@ def _replace_line(i, l, token, team, proxy, logger=None):
             continue
 
         logger.info('  upload ... %s' % str(path_img))
-        p = Path(unquote(path_img))
+        p = Path(path_wd) / Path(unquote(path_img))
         try:
             url = upload_binary(p, token=token, team=team, proxy=proxy, logger=logger)
 

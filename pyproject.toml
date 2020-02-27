@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "esapy"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
 description = "A python implementation of esa.io API"
 readme = "README.md"
