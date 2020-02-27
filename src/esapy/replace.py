@@ -37,6 +37,7 @@ def _replace(path_input, clipboard=False, token=None, team=None, proxy=None, log
     path_output.open('w', encoding='utf-8').writelines(md_body_modified)
     logger.info('Modified markdown is saved as %s' % str(path_output))
 
+    return ''.join(md_body_modified)
 
 def _replace_line(i, l, token, team, proxy, logger=None):
     logger = logger or getLogger(__name__)

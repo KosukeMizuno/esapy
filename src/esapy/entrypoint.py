@@ -22,11 +22,18 @@ def command_up(args):
     # replace
     token, team = get_token_and_team(args)
 
-    _replace(path_input=path_md,
-             clipboard=args.clipboard,
-             token=token, team=team,
-             proxy=args.proxy,
-             logger=logger)
+    body_md = _replace(path_input=path_md,
+                       clipboard=args.clipboard,
+                       token=token, team=team,
+                       proxy=args.proxy,
+                       logger=logger)
+
+    # publish
+    if args.publish:
+        create_post(body_md,
+                    name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
+                    token=token, team=team, proxy=args.proxy,
+                    logger=logger)
 
 
 def command_convert(args):
@@ -78,6 +85,18 @@ parser_up.add_argument('target', metavar='<input_filepath>', help='filename whic
 g_up_clip = parser_up.add_mutually_exclusive_group()
 g_up_clip.add_argument('--clipboard', action='store_true', default=None, help='go markdown body to clipborad after process')
 g_up_clip.add_argument('--no-clipboard', action='store_false', dest='clipboard')
+
+g_up_publish = parser_up.add_mutually_exclusive_group()
+g_up_publish.add_argument('--publish', action='store_true', default=True, help='publish markdown')
+g_up_publish.add_argument('--no-publish', action='store_false', dest='publish')
+parser_up.add_argument('--name', metavar='<post title>')
+parser_up.add_argument('--category', metavar='<post category>')
+parser_up.add_argument('--message', metavar='<post message>')
+parser_up.add_argument('--tag', metavar='<post tag>', action='append', help='if your want to assign some tags, `--tag XXX --tag YYY`')
+g_up_wip = parser_up.add_mutually_exclusive_group()
+g_up_wip.add_argument('--wip', action='store_true', default=True)
+g_up_wip.add_argument('--no-wip', dest='wip', action='store_false')
+
 parser_up.add_argument('--token', metavar='<esa.io_token>', help='your access token for esa.io (read/write required)')
 parser_up.add_argument('--team', metavar='<esa.io_team_name>', help='*** of `https://***.esa.io/`')
 parser_up.add_argument('--proxy', metavar='<url>:<port>')
