@@ -4,14 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
+### TODO
+- support for latex input
+
+
+## [0.4.0]
 ### Added
 - proxy setting
 - subcommand
   - `esa stats`
+  - `esa publish`
 
-### TODO
-- support for latex input
-- create post (upload markdown)
+### Changed
+- automatically publish when `esa up ***.ipynb`
 
 
 ## [0.3.0] - 2020-02-27
