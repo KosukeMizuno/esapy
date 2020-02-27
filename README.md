@@ -50,9 +50,9 @@ The main purpose of this package is implementation of easy uploading and sharing
     $ esa up target.ipynb
     ```
 
-    This package (for now) will call nbconvert and upload images, and will not upload markdown file as new post.
+    This package will call nbconvert and upload images, and upload markdown file as new post.
 
-1. Post a new article by copy-and-paste the generated markdown file.
+1. access the new post and edit.
 
 1. if process fails due to a network problem, you can re-try with `esa up target.md` .  When the input is a markdown, `nbconvert` step will be skipped.
 
@@ -61,10 +61,10 @@ The main purpose of this package is implementation of easy uploading and sharing
 
 ### commands
 This package registers following cli commands.
-- `esa up [-h] [--clipboard] [--token <esa.io_token>] [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose] <input_filepath>`
+- `esa up <input_filepath>`
   - upload your file
   - supported format: ipynb, tex, and md
-  - This command calls `esa convert` and `esa replace` internally
+  - This command calls `esa convert` , `esa replace` , and `esa publish` internally
 
 - `esa config`
   - list environs and config
@@ -73,16 +73,18 @@ This package registers following cli commands.
   - show statistics of your team
   - This command can be used for access test.
 
-- `esa convert [-h] [--verbose] <input_filepath>`
+- `esa convert <input_filepath>`
   - subcommand
   - call nbconvert or pandoc depending input format
 
-- `esa replace [-h] [--clipboard] [--token <esa.io_token>] [--team <esa.io_team_name>] [--proxy <url>:<port>] [--verbose] <input_filepath markdown file>`
+- `esa replace <input_filepath markdown file>`
   - subcommand
   - scan lines of markdown finding image tags (`![xxx](yyy)`).
   - when the file path is not url, image file will be uploaded to your team of esa.io.
   - If token/team are given as arguments and config file simultaneously, arguments are used.
 
+- `esa publish <input_filepath markdown file>`
+  - create new post
 
 
 ### config file

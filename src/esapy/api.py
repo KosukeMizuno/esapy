@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import mimetypes
 import requests
-
+import json
 
 # logger
 from logging import getLogger
@@ -81,6 +81,40 @@ def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
     logger.info('  the file is successfully uploaded, url: %s' % image_url)
 
     return image_url
+
+
+def create_post(body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None, logger=None):
+    logger = logger or getLogger(__name__)
+
+    logger.info('uploading markdown')
+
+    # post
+    _set_proxy(proxy, logger=logger)
+    url = 'https://api.esa.io/v1/teams/%s/posts' % team
+    header = {'Authorization': 'Bearer %s' % token,
+              'Content-Type': 'application/json'}
+
+    params = dict(post=dict(name=name or "",
+                            message=message or "Create post via esapy",
+                            body_md=body_md,
+                            wip=wip))
+    if isinstance(tags, list) and all([isinstance(t, str) for t in tags]):
+        params['post']['tags'] = tags
+    if category is not None:
+        params['post']['category'] = category
+
+    res = requests.post(url, headers=header, data=json.dumps(params))
+    logger.debug(res)
+
+    if res.status_code != 201:
+        raise RuntimeError('Create post failed.')
+    logger.info('New post was successfully created.')
+
+    d = res.json()
+    logger.debug(dict(d, **{'body_md': '<not shown>', 'body_html': '<not shown>'}))
+    print('New post was created, url: %s' % d['url'])
+
+    return d['url']
 
 
 if __name__ == '__main__':
