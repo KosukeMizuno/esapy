@@ -68,6 +68,10 @@ This package registers following cli commands.
 - `esa config`
   - list environs and config
 
+- `esa stats`
+  - show statistics of your team
+  - This command can be used for access test.
+
 - `esa convert [-h] [--verbose] <input_filepath>`
   - subcommand
   - call nbconvert or pandoc depending input format
