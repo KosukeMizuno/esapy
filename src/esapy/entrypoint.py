@@ -6,6 +6,7 @@ import argparse
 from .loadrc import _show_configuration, get_token_and_team
 from .replace import _replace
 from .convert import _call_converter
+from .api import get_team_stats
 
 
 # logger
@@ -40,6 +41,14 @@ def command_replace(args):
              token=token, team=team,
              proxy=args.proxy,
              logger=logger)
+
+
+def command_stats(args):
+    token, team = get_token_and_team(args)
+
+    get_team_stats(token=token, team=team,
+                   proxy=args.proxy,
+                   logger=logger)
 
 
 def command_publish(args):
@@ -81,6 +90,14 @@ parser_replace.add_argument('--verbose', '-v', action='count', default=0)
 
 # publish <target.md>
 pass
+
+# replace & upload
+parser_stats = subparsers.add_parser('stats', help='show statistics of your team')
+parser_stats.set_defaults(handler=command_stats)
+parser_stats.add_argument('--token', metavar='<esa.io_token>', help='your access token for esa.io (read/write required)')
+parser_stats.add_argument('--team', metavar='<esa.io_team_name>', help='*** of `https://***.esa.io/`')
+parser_stats.add_argument('--proxy', metavar='<url>:<port>')
+parser_stats.add_argument('--verbose', '-v', action='count', default=0)
 
 # config
 parser_config = subparsers.add_parser('config', help='show your config files')

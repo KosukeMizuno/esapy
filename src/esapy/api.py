@@ -9,6 +9,27 @@ import requests
 from logging import getLogger
 
 
+def get_team_stats(token=None, team=None, proxy=None, logger=None):
+    if proxy is not None:
+        raise RuntimeError('proxy has not yet been implemented.')
+
+    logger = logger or getLogger(__name__)
+
+    logger.info('getting team statistics')
+
+    # get metadata
+    url = 'https://api.esa.io/v1/teams/%s/stats' % team
+    header = dict(Authorization='Bearer %s' % token)
+
+    res = requests.get(url, headers=header)
+    logger.info(res)
+
+    d = res.json()
+
+    print(d)
+    return d
+
+
 def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
     if proxy is not None:
         raise RuntimeError('proxy has not yet been implemented.')
