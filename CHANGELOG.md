@@ -5,8 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 ### Added
-- proxy
+- proxy setting
+- subcommand
+  - `esa stats`
+
+### TODO
 - support for latex input
+- create post (upload markdown)
+
 
 ## [0.3.0] - 2020-02-27
 ### Added
