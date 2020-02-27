@@ -33,6 +33,8 @@ def _call_converter(args, logger=None):
                '-s', '%s' % str(path_target),
                '-o', '%s' % str(path_output)]
 
+        subprocess.check_call(cmd)
+
     elif ext == '.md':
         logger.info('Input file is markdown. Nothing was done.')
 
