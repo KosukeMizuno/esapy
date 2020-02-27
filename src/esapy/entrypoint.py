@@ -6,11 +6,11 @@ import argparse
 from .loadrc import _show_configuration, get_token_and_team
 from .replace import _replace
 from .convert import _call_converter
-from .api import get_team_stats
+from .api import get_team_stats, create_post
 
 
 # logger
-from logging import getLogger, StreamHandler, FileHandler, DEBUG
+from logging import getLogger, StreamHandler, FileHandler, DEBUG, INFO
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
 
@@ -52,7 +52,16 @@ def command_stats(args):
 
 
 def command_publish(args):
-    pass  # TODO
+    path_md = Path(args.target_md)
+    body_lines = path_md.open('r', encoding='utf-8').readlines()
+    body_md = ''.join(body_lines)
+
+    token, team = get_token_and_team(args)
+
+    create_post(body_md,
+                name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
+                token=token, team=team, proxy=args.proxy,
+                logger=logger)
 
 
 def command_config(args):
@@ -89,7 +98,20 @@ parser_replace.add_argument('--proxy', metavar='<url>:<port>')
 parser_replace.add_argument('--verbose', '-v', action='count', default=0)
 
 # publish <target.md>
-pass
+parser_publish = subparsers.add_parser('publish', help='show statistics of your team')
+parser_publish.set_defaults(handler=command_publish)
+parser_publish.add_argument('target_md', metavar='<input_filepath (markdown file)>')
+parser_publish.add_argument('--name', metavar='<post title>')
+parser_publish.add_argument('--category', metavar='<post category>')
+parser_publish.add_argument('--message', metavar='<post message>')
+parser_publish.add_argument('--tag', metavar='<post tag>', action='append', help='if your want to assign some tags, `--tag XXX --tag YYY`')
+g_pub_wip = parser_publish.add_mutually_exclusive_group()
+g_pub_wip.add_argument('--wip', action='store_true', default=True)
+g_pub_wip.add_argument('--no-wip', dest='wip', action='store_false')
+parser_publish.add_argument('--token', metavar='<esa.io_token>', help='your access token for esa.io (read/write required)')
+parser_publish.add_argument('--team', metavar='<esa.io_team_name>', help='*** of `https://***.esa.io/`')
+parser_publish.add_argument('--proxy', metavar='<url>:<port>')
+parser_publish.add_argument('--verbose', '-v', action='count', default=0)
 
 # replace & upload
 parser_stats = subparsers.add_parser('stats', help='show statistics of your team')
@@ -108,8 +130,10 @@ def main():
     args = parser.parse_args()
 
     try:
-        if args.verbose > 0:
+        if args.verbose > 1:
             logger.setLevel(DEBUG)
+        elif args.verbose > 0:
+            logger.setLevel(INFO)
     except AttributeError:
         pass
 
