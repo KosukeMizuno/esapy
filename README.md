@@ -84,6 +84,7 @@ This package registers following cli commands.
   - If token/team are given as arguments and config file simultaneously, arguments are used.
 
 - `esa publish <input_filepath markdown file>`
+  - subcommand
   - create new post
 
 
