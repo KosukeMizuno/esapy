@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 
 
+## [0.4.3] - 2020-02-27
+### Added
+- `[--edit-in-browser | --no-browser]` option for `esa up`
+  - open edit page on browser after publish
+  - default: `--edit-in-browser`
 
 ## [0.4.2] - 2020-02-27
 ### Fixed

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import argparse
+import webbrowser
 
 from .loadrc import _show_configuration, get_token_and_team
 from .replace import _replace
@@ -32,10 +33,15 @@ def command_up(args):
 
     # publish
     if args.publish:
-        create_post(body_md,
-                    name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
-                    token=token, team=team, proxy=args.proxy,
-                    logger=logger)
+        post_url = create_post(body_md,
+                               name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
+                               token=token, team=team, proxy=args.proxy,
+                               logger=logger)
+
+        if args.browser:
+            edit_url = post_url + '/edit'
+            logger.info('opening edit page ...')
+            webbrowser.open(edit_url, new=2)
 
 
 def command_convert(args):
@@ -99,6 +105,9 @@ parser_up.add_argument('--tag', metavar='<post tag>', action='append', help='if 
 g_up_wip = parser_up.add_mutually_exclusive_group()
 g_up_wip.add_argument('--wip', action='store_true', default=True)
 g_up_wip.add_argument('--no-wip', dest='wip', action='store_false')
+g_up_browse = parser_up.add_mutually_exclusive_group()
+g_up_browse.add_argument('--edit-in-browser', dest='browser', action='store_true', default=True, help='open edit page on browser after publish')
+g_up_browse.add_argument('--no-browser', dest='browser', action='store_false')
 
 parser_up.add_argument('--token', metavar='<esa.io_token>', help='your access token for esa.io (read/write required)')
 parser_up.add_argument('--team', metavar='<esa.io_team_name>', help='*** of `https://***.esa.io/`')
