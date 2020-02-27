@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from pathlib import Path
 import mimetypes
 import requests
@@ -9,13 +10,23 @@ import requests
 from logging import getLogger
 
 
-def get_team_stats(token=None, team=None, proxy=None, logger=None):
-    if proxy is not None:
-        raise RuntimeError('proxy has not yet been implemented.')
+def _set_proxy(proxy, logger=None):
+    logger = logger or getLogger(__name__)
 
+    if proxy is None:
+        return
+
+    logger.info('proxy: %s' % proxy)
+    os.environ['HTTP_PROXY'] = proxy
+    os.environ['HTTPS_PROXY'] = proxy
+
+
+def get_team_stats(token=None, team=None, proxy=None, logger=None):
     logger = logger or getLogger(__name__)
 
     logger.info('getting team statistics')
+
+    _set_proxy(proxy, logger=logger)
 
     # get metadata
     url = 'https://api.esa.io/v1/teams/%s/stats' % team
@@ -31,14 +42,13 @@ def get_team_stats(token=None, team=None, proxy=None, logger=None):
 
 
 def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
-    if proxy is not None:
-        raise RuntimeError('proxy has not yet been implemented.')
-
     logger = logger or getLogger(__name__)
 
     path_bin = Path(filename)
     logger.info('uploading binary, %s' % str(path_bin))
     logger.info('  filesize: %d' % path_bin.stat().st_size)
+
+    _set_proxy(proxy, logger=logger)
 
     # get metadata
     url = 'https://api.esa.io/v1/teams/%s/attachments/policies' % team
