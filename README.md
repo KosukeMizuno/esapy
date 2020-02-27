@@ -27,16 +27,16 @@ The main purpose of this package is implementation of easy uploading and sharing
 
 1. generate esa.io token with read/write permission.
 
-1. make configuration file in your home directory (~/.esapyrc).
+1. make configuration file in your home directory (`~/.esapyrc`).
 
     ```YAML: ~/.esapyrc
     token: your_token
     team: your_team
     ```
 
-    - You can set them as environment variables: ESA_PYTHON_TOKEN, ESA_PYTHON_TEAM.
-    - Environment variables are prior to .esapyrc file.
-    - You can check your token using `esa config`. 
+    - You can set them as environment variables: `ESA_PYTHON_TOKEN`, `ESA_PYTHON_TEAM`.
+    - Environment variables are prior to `.esapyrc` file.
+    - You can check your token using `esa config` from command line. 
 
 
 
@@ -60,7 +60,7 @@ The main purpose of this package is implementation of easy uploading and sharing
 ## DOCUMENT
 
 ### commands
-This package registers following cli commands.
+This package registers following command line tools.
 - `esa up <input_filepath>`
   - upload your file
   - supported format: ipynb, tex, and md
@@ -89,7 +89,7 @@ This package registers following cli commands.
 
 
 ### config file
-The config file (~/.esapyrc) should be written in yaml format.
+The config file (`~/.esapyrc`) should be written in yaml format.
 An example is shown below.
 ```yaml: ~/.esapyrc
 token: your_token
@@ -103,4 +103,4 @@ If `action.goto_clipboard` is true, a markdown body with modified urls will be c
 
 ## License
 Copyright (c) 2020 Kosuke Mizuno  
-This package is released under the MIT license (see LICENSE file).
+This package is released under the MIT license (see [LICENSE](LICENSE) file).
