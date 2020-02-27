@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### TODO
 - support for latex input
 
+## [0.4.1]
+### Fixed
+- support latex input
+
 
 ## [0.4.0]
 ### Added
