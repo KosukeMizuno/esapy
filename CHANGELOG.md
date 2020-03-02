@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ### TODO
 - support for latex input with images
 
+## [0.4.4] - 2020-03-02
+### Fixed
+- Capture FileNotFoundError when `.esapyrc` doesn't exist.
 
 ## [0.4.3] - 2020-02-27
 ### Added
