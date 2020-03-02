@@ -78,22 +78,25 @@ def _get_rcfilepath():
 def _load_rcfile():
     path_rc = _get_rcfilepath()
 
-    with path_rc.open('r') as f:
-        y = yaml.safe_load(f)
+    try:
+        with path_rc.open('r') as f:
+            y = yaml.safe_load(f)
+
+    except FileNotFoundError as e:
+        y = {}
 
     return y
 
 
 def _load_token_from_rcfile():
-    path_rc = Path.home() / RCFILE
     x = None
 
-    with path_rc.open('r') as f:
-        y = yaml.safe_load(f)
-        try:
-            x = y['token'], y['team']
-        except:
-            pass
+    y = _load_rcfile()
+    try:
+        x = y['token'], y['team']
+    except KeyError:
+        pass
+
     return x
 
 
