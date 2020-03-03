@@ -19,10 +19,10 @@ def _get_tempfile(path_input):
     """get temporary filename for replacing
     """
     p = path_input
-    if not p.is_exist():
+    if not p.exists():
         raise FileNotFoundError()
 
-    while p.is_exist():
+    while p.exists():
         unieq_key = str(uuid.uuid4())
         p = path_input.with_suffix('.' + unieq_key + '.md')
 
