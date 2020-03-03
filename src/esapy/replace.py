@@ -24,9 +24,21 @@ def _get_tempfile(path_input):
 
     while p.exists():
         unieq_key = str(uuid.uuid4())
-        p = path_input.with_suffix('.' + unieq_key + '.md')
+        p = path_input.with_suffix('.' + unieq_key + path_input.suffix)
 
     return p
+
+
+def _get_output_path(path_input, output, no_output):
+    if no_output:
+        return _get_tempfile(path_input)
+
+    return Path(output)
+
+
+def _remove_tempfile(path_temp, no_output):
+    if no_output:
+        path_temp.unlink()
 
 
 def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team=None, proxy=None, logger=None):

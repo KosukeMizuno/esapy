@@ -23,13 +23,17 @@ def command_up(args):
 
     # replace
     token, team = get_token_and_team(args)
+    path_output = _get_output_path(path_md, args.output, args.no_output)
 
     body_md = _replace(path_input=path_md,
                        path_wd=path_wd,
+                       path_output=path_output,
                        clipboard=args.clipboard,
                        token=token, team=team,
                        proxy=args.proxy,
                        logger=logger)
+
+    _remove_tempfile(path_output, args.no_output)
 
     # publish
     if args.publish:
@@ -51,12 +55,18 @@ def command_convert(args):
 def command_replace(args):
     token, team = get_token_and_team(args)
 
-    _replace(path_input=Path(args.target_md),
-             path_wd=Path(args.target_md).parent,
+    path_input = Path(args.target_md)
+    path_output = _get_output_path(path_input, args.output, args.no_output)
+
+    _replace(path_input=path_input,
+             path_wd=path_input.parent,
+             path_output=path_output,
              clipboard=args.clipboard,
              token=token, team=team,
              proxy=args.proxy,
              logger=logger)
+
+    _remove_tempfile(path_output, args.no_output)
 
 
 def command_stats(args):
