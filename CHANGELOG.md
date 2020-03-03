@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 ## [Unreleased]
 ### TODO
 - support for latex input with images
+- check publish status and error-handling
+
+## [0.5.0] - 2020-03-04
+### Added
+- Add output options
+- Non-destrutive replace & upload can be used (Default: non-destructive).
 
 ## [0.4.4] - 2020-03-02
 ### Fixed
