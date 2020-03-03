@@ -29,14 +29,20 @@ def _get_tempfile(path_input):
     return p
 
 
-def _get_output_path(path_input, output, no_output):
+def _get_output_path(path_input, output, no_output, destructive):
+    if destructive:
+        return path_input
+
     if no_output or output is None:
         return _get_tempfile(path_input)
 
     return Path(output)
 
 
-def _remove_tempfile(path_temp, output, no_output):
+def _remove_tempfile(path_temp, output, no_output, destructive):
+    if destructive:
+        return
+
     if no_output or output is None:
         path_temp.unlink()
 
