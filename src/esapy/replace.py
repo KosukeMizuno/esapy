@@ -4,6 +4,8 @@ import re
 import subprocess
 from pathlib import Path
 from urllib.parse import unquote
+import uuid
+
 import pyperclip
 
 from .api import upload_binary
@@ -13,7 +15,39 @@ from .loadrc import _load_rcfile
 from logging import getLogger
 
 
-def _replace(path_input, path_wd, clipboard=False, token=None, team=None, proxy=None, logger=None):
+def _get_tempfile(path_input):
+    """get temporary filename for replacing
+    """
+    p = path_input
+    if not p.exists():
+        raise FileNotFoundError()
+
+    while p.exists():
+        unieq_key = str(uuid.uuid4())
+        p = path_input.with_suffix('.' + unieq_key + path_input.suffix)
+
+    return p
+
+
+def _get_output_path(path_input, output, no_output, destructive):
+    if destructive:
+        return path_input
+
+    if no_output or output is None:
+        return _get_tempfile(path_input)
+
+    return Path(output)
+
+
+def _remove_tempfile(path_temp, output, no_output, destructive):
+    if destructive:
+        return
+
+    if no_output or output is None:
+        path_temp.unlink()
+
+
+def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team=None, proxy=None, logger=None):
     logger = logger or getLogger(__name__)
     logger.info('Replace & upload images in %s' % str(path_input))
 
@@ -33,11 +67,11 @@ def _replace(path_input, path_wd, clipboard=False, token=None, team=None, proxy=
     _go_clipboard(''.join(md_body_modified), clipboard, logger)
 
     # save modified markdonwn
-    path_output = path_input
     path_output.open('w', encoding='utf-8').writelines(md_body_modified)
     logger.info('Modified markdown is saved as %s' % str(path_output))
 
     return ''.join(md_body_modified)
+
 
 def _replace_line(i, l, path_wd, token, team, proxy, logger=None):
     logger = logger or getLogger(__name__)

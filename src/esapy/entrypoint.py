@@ -5,7 +5,7 @@ import argparse
 import webbrowser
 
 from .loadrc import _show_configuration, get_token_and_team
-from .replace import _replace
+from .replace import _replace, _get_tempfile, _get_output_path, _remove_tempfile
 from .convert import _call_converter
 from .api import get_team_stats, create_post
 
@@ -23,13 +23,17 @@ def command_up(args):
 
     # replace
     token, team = get_token_and_team(args)
+    path_output = _get_output_path(path_md, args.output, args.no_output, args.destructive)
 
     body_md = _replace(path_input=path_md,
                        path_wd=path_wd,
+                       path_output=path_output,
                        clipboard=args.clipboard,
                        token=token, team=team,
                        proxy=args.proxy,
                        logger=logger)
+
+    _remove_tempfile(path_output, args.output, args.no_output, args.destructive)
 
     # publish
     if args.publish:
@@ -38,11 +42,13 @@ def command_up(args):
                                token=token, team=team, proxy=args.proxy,
                                logger=logger)
 
+        # TODO
+        # if publish is failed, output temp file should be regenerated.
+
         if args.browser:
             edit_url = post_url + '/edit'
             logger.info('opening edit page ...')
             webbrowser.open(edit_url, new=2)
-
 
 def command_convert(args):
     _call_converter(args, logger=logger)
@@ -51,12 +57,18 @@ def command_convert(args):
 def command_replace(args):
     token, team = get_token_and_team(args)
 
-    _replace(path_input=Path(args.target_md),
-             path_wd=Path(args.target_md).parent,
+    path_input = Path(args.target_md)
+    path_output = _get_output_path(path_input, args.output, args.no_output, args.destructive)
+
+    _replace(path_input=path_input,
+             path_wd=path_input.parent,
+             path_output=path_output,
              clipboard=args.clipboard,
              token=token, team=team,
              proxy=args.proxy,
              logger=logger)
+
+    _remove_tempfile(path_output, args.output, args.no_output, args.destructive)
 
 
 def command_stats(args):
@@ -91,6 +103,11 @@ subparsers = parser.add_subparsers()
 parser_up = subparsers.add_parser('up', help='convert & upload images & generate modified markdown')
 parser_up.set_defaults(handler=command_up)
 parser_up.add_argument('target', metavar='<input_filepath>', help='filename which you want to upload')
+
+g_up_output = parser_up.add_mutually_exclusive_group()
+g_up_output.add_argument('--output', metavar='<output_filepath.md>', help='output filename')
+g_up_output.add_argument('--no-output', action='store_true', help='work on temporary file')
+g_up_output.add_argument('--destructive', action='store_true', help='upload & replace destructively')
 g_up_clip = parser_up.add_mutually_exclusive_group()
 g_up_clip.add_argument('--clipboard', action='store_true', default=None, help='go markdown body to clipborad after process')
 g_up_clip.add_argument('--no-clipboard', action='store_false', dest='clipboard')
@@ -124,6 +141,10 @@ parser_conv.add_argument('--verbose', '-v', action='count', default=0)
 parser_replace = subparsers.add_parser('replace', help='[subcommand] find img references in markdown, upload image if its path is relative, and replace path to url')
 parser_replace.set_defaults(handler=command_replace)
 parser_replace.add_argument('target_md', metavar='<input_filepath (markdown file)>')
+g_rep_output = parser_replace.add_mutually_exclusive_group()
+g_rep_output.add_argument('--output', metavar='<output_filepath.md>', help='output filename')
+g_rep_output.add_argument('--no-output', action='store_true', help='work on temporary file')
+g_rep_output.add_argument('--destructive', action='store_true', help='upload & replace destructively')
 g_rep_clip = parser_replace.add_mutually_exclusive_group()
 g_rep_clip.add_argument('--clipboard', action='store_true', default=None, help='go markdown body to clipborad after process')
 g_rep_clip.add_argument('--no-clipboard', action='store_false', dest='clipboard')
