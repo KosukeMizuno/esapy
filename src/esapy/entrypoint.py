@@ -5,7 +5,7 @@ import argparse
 import webbrowser
 
 from .loadrc import _show_configuration, get_token_and_team
-from .replace import _replace
+from .replace import _replace, _get_tempfile, _get_output_path, _remove_tempfile
 from .convert import _call_converter
 from .api import get_team_stats, create_post
 
@@ -33,7 +33,7 @@ def command_up(args):
                        proxy=args.proxy,
                        logger=logger)
 
-    _remove_tempfile(path_output, args.no_output)
+    _remove_tempfile(path_output, args.output, args.no_output)
 
     # publish
     if args.publish:
@@ -66,7 +66,7 @@ def command_replace(args):
              proxy=args.proxy,
              logger=logger)
 
-    _remove_tempfile(path_output, args.no_output)
+    _remove_tempfile(path_output, args.output, args.no_output)
 
 
 def command_stats(args):
