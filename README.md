@@ -103,6 +103,13 @@ action:
 
 If `action.goto_clipboard` is true, a markdown body with modified urls will be copied to clipboard.  Default is false.
 
-## License
+## INSTALLATION for DEVELOPMENT
+
+1. setup poetry on your environment
+1. clone this repository
+1. cd repo directory
+1. `poetry install`
+
+## LICENSE
 Copyright (c) 2020 Kosuke Mizuno  
 This package is released under the MIT license (see [LICENSE](LICENSE) file).
