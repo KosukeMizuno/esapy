@@ -1,0 +1,86 @@
+@startuml
+title Upload process
+
+start
+:Secure temporal working directory;
+
+partition Process_Images {
+    if (md file ?) then (y)
+        :Upload local images;
+    elseif (tex file ?) then (y)
+        :Call pandoc;
+        :Upload local images;
+    elseif (ipynb file ?) then (y)
+        :Secure temporal copy of ipynb file;
+        :Upload local images;
+        :Upload old output images;
+        :Upload attached images;
+    else (other)
+        :Remove temporal files;
+        stop
+    endif
+    :Generate markdown for upload of which image references are replaced with uploaded url;
+}
+
+if (All uploadings succeeded ?\nOr force mode ?) then (no)
+    :Show errors;
+else (yes)
+    partition Process_Body {
+        partition Upload_Body {
+            if (Is ipynb file ?) then (yes)
+                :Load past uploads from metadata;
+                if (Is uploading first time ?) then (no)
+                    if (force_new_post mode ?) then (yes)
+                        :Create new post;
+                    else (no)
+                        :Patch the post;
+                    endif
+                else (yes)
+                    :Create new post;
+                endif
+            else
+                :Create new post;
+            endif
+        }
+
+        if (ipynb file ?) then (yes)
+            :Record uploading responce in metadata;
+        endif
+
+        if (Uploading succeeded ?) then (yes)
+            if (Is edit page needed?) then (yes)
+                :Open edit page in browser;
+            endif
+        else (no) 
+            :Show error;
+        endif
+    }
+endif
+
+partition Finalize {
+    if (Is it destructive mode ?) then (yes)
+        if (ipynb file ?) then (yes)
+            :Substitute input ipynb file;
+        elseif (md file ?) then (yes)
+            :Substitute input md file;
+        else (tex)
+        endif
+    else (no)
+        if (Is output filename assigned ?) then (yes)
+            if (ipynb file ?) then (yes)
+                :Save ipynb file;
+            elseif (md file ?) then (yes)
+                :Save md file;
+            else (tex)
+            endif
+        else (no)
+        endif
+    endif
+    
+}
+
+:Remove temporal working directory & files;
+
+stop
+
+@enduml
