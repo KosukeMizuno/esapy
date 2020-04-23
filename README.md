@@ -109,6 +109,7 @@ If `action.goto_clipboard` is true, a markdown body with modified urls will be c
 1. clone this repository
 1. cd repo directory
 1. `poetry install`
+1. `git checkout develop`
 
 ## LICENSE
 Copyright (c) 2020 Kosuke Mizuno  
