@@ -212,6 +212,28 @@ cell_type は次の3通り (raw, markdown, code) が存在する
 
 
 
+### metadataの保存性について
+
+- notebook
+  - notebook.metadataにkey/valueを追加してからrestart & run all
+    - 保存された
+- cell
+  - cell.metadataにkey/valueを追加してから該当セルを実行
+    - 保存された
+  - cell.metadataにkey/valueを追加してから該当セルを移動
+    - 保存された
+  - cell.metadataにkey/valueを追加してから該当セルをコピー＆ペースト
+    - 保存された
+  - cell.metadataにkey/valueを追加してから該当セルをカット＆ペースト
+    - 保存された
+- output
+  - output.metadataにkey/valueを追加してから該当セルを実行
+    - 上書きされた
+
+以上より、outputブロック内以外は全て保存されることがわかった。
+
+
+
 ## esapyの実装に関するメモ
 
 ### 折りたたみ
