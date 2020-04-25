@@ -7,3 +7,6 @@
 /src/*.egg-info/
 /src/esapy/__pycache__/
 
+# markdown
+.~*.md
+*/.~*.md
