@@ -11,14 +11,14 @@ from .api import get_team_stats, create_post
 
 
 # logger
-from logging import getLogger, StreamHandler, FileHandler, DEBUG, INFO
+from logging import getLogger, basicConfig, DEBUG, INFO
+root_logger = getLogger(__package__)
 logger = getLogger(__name__)
-logger.addHandler(StreamHandler())
 
 
 def command_up_old(args):
     # convert
-    path_md = _call_converter(args, logger=logger)
+    path_md = _call_converter(args)
     path_wd = path_md.parent
 
     # replace
@@ -30,8 +30,7 @@ def command_up_old(args):
                        path_output=path_output,
                        clipboard=args.clipboard,
                        token=token, team=team,
-                       proxy=args.proxy,
-                       logger=logger)
+                       proxy=args.proxy)
 
     _remove_tempfile(path_output, args.output, args.no_output, args.destructive)
 
@@ -39,8 +38,7 @@ def command_up_old(args):
     if args.publish:
         post_url = create_post(body_md,
                                name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
-                               token=token, team=team, proxy=args.proxy,
-                               logger=logger)
+                               token=token, team=team, proxy=args.proxy)
 
         # TODO
         # if publish is failed, output temp file should be regenerated.
@@ -59,8 +57,7 @@ def command_stats(args):
     token, team = get_token_and_team(args)
 
     get_team_stats(token=token, team=team,
-                   proxy=args.proxy,
-                   logger=logger)
+                   proxy=args.proxy)
 
 
 def command_config(args):
@@ -116,13 +113,20 @@ parser.add_argument('--verbose', '-v', action='count', default=0)
 
 
 def main():
+    # logger config
+    basicConfig(format='[%(asctime)s] %(name)s %(levelname)s: %(message)s')
+
+    # parse arguments
     args = parser.parse_args()
 
-    if args.verbose > 1:
-        logger.setLevel(DEBUG)
-    elif args.verbose > 0:
-        logger.setLevel(INFO)
+    # verbose level
+    if args.verbose >= 2:
+        root_logger.setLevel(DEBUG)
+    elif args.verbose >= 1:
+        root_logger.setLevel(INFO)
+    logger.info('verbose level={:d}'.format(args.verbose))
 
+    # call each function
     args.handler(args)
 
 

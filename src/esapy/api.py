@@ -8,11 +8,10 @@ import json
 
 # logger
 from logging import getLogger
+logger = getLogger(__name__)
 
 
-def _set_proxy(proxy, logger=None):
-    logger = logger or getLogger(__name__)
-
+def _set_proxy(proxy):
     if proxy is None:
         return
 
@@ -21,12 +20,10 @@ def _set_proxy(proxy, logger=None):
     os.environ['HTTPS_PROXY'] = proxy
 
 
-def get_team_stats(token=None, team=None, proxy=None, logger=None):
-    logger = logger or getLogger(__name__)
-
+def get_team_stats(token=None, team=None, proxy=None):
     logger.info('getting team statistics')
 
-    _set_proxy(proxy, logger=logger)
+    _set_proxy(proxy)
 
     # get metadata
     url = 'https://api.esa.io/v1/teams/%s/stats' % team
@@ -41,14 +38,12 @@ def get_team_stats(token=None, team=None, proxy=None, logger=None):
     return d
 
 
-def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
-    logger = logger or getLogger(__name__)
-
+def upload_binary(filename, token=None, team=None, proxy=None):
     path_bin = Path(filename)
     logger.info('uploading binary, %s' % str(path_bin))
     logger.info('  filesize: %d' % path_bin.stat().st_size)
 
-    _set_proxy(proxy, logger=logger)
+    _set_proxy(proxy)
 
     # get metadata
     url = 'https://api.esa.io/v1/teams/%s/attachments/policies' % team
@@ -83,13 +78,11 @@ def upload_binary(filename, token=None, team=None, proxy=None, logger=None):
     return image_url
 
 
-def create_post(body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None, logger=None):
-    logger = logger or getLogger(__name__)
-
+def create_post(body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None):
     logger.info('uploading markdown')
 
     # post
-    _set_proxy(proxy, logger=logger)
+    _set_proxy(proxy)
     url = 'https://api.esa.io/v1/teams/%s/posts' % team
     header = {'Authorization': 'Bearer %s' % token,
               'Content-Type': 'application/json'}

@@ -5,11 +5,10 @@ from pathlib import Path
 
 # logger
 from logging import getLogger
+logger = getLogger(__name__)
 
 
-def _call_converter(args, logger=None):
-    logger = logger or getLogger(__name__)
-
+def _call_converter(args):
     path_target = Path(args.target)
     ext = path_target.suffix
     path_output = path_target.with_suffix('.md')

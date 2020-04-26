@@ -13,6 +13,7 @@ from .loadrc import _load_rcfile
 
 # logger
 from logging import getLogger
+logger = getLogger(__name__)
 
 
 def _get_tempfile(path_input):
@@ -47,8 +48,7 @@ def _remove_tempfile(path_temp, output, no_output, destructive):
         path_temp.unlink()
 
 
-def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team=None, proxy=None, logger=None):
-    logger = logger or getLogger(__name__)
+def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team=None, proxy=None):
     logger.info('Replace & upload images in %s' % str(path_input))
 
     # replace & upload
@@ -58,7 +58,7 @@ def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team
         md_body_modified = []
 
         for i, l in enumerate(md_body):
-            _l = _replace_line(i, l, path_wd, token, team, proxy, logger=logger)
+            _l = _replace_line(i, l, path_wd, token, team, proxy)
             md_body_modified.append(_l)
 
     logger.info('Replace finished.')
@@ -73,9 +73,7 @@ def _replace(path_input, path_wd, path_output, clipboard=False, token=None, team
     return ''.join(md_body_modified)
 
 
-def _replace_line(i, l, path_wd, token, team, proxy, logger=None):
-    logger = logger or getLogger(__name__)
-
+def _replace_line(i, l, path_wd, token, team, proxy):
     # find image tags
     matches = list(re.finditer(r'!\[(.*?)\]\((.+?)\)', l))
     if len(matches) > 1:
@@ -96,7 +94,7 @@ def _replace_line(i, l, path_wd, token, team, proxy, logger=None):
         logger.info('  upload ... %s' % str(path_img))
         p = Path(path_wd) / Path(unquote(path_img))
         try:
-            url = upload_binary(p, token=token, team=team, proxy=proxy, logger=logger)
+            url = upload_binary(p, token=token, team=team, proxy=proxy)
 
         except Exception as e:
             logger.warning(e)
@@ -108,11 +106,9 @@ def _replace_line(i, l, path_wd, token, team, proxy, logger=None):
     return _l
 
 
-def _go_clipboard(md_body, args_flg, logger=None):
+def _go_clipboard(md_body, args_flg):
     """flg in args > flg in rc file
     """
-    logger = logger or getLogger(__name__)
-
     cfg = _load_rcfile()
     rc_flg = cfg.get('tool', {}).get('goto_clipboard', False)
 
