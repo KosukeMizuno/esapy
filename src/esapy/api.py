@@ -13,15 +13,18 @@ logger = getLogger(__name__)
 
 def _set_proxy(proxy):
     if proxy is None:
+        logger.debug('No proxy is addressed.')
         return
 
-    logger.info('proxy: %s' % proxy)
+    logger.info('Addressed proxy: %s' % proxy)
     os.environ['HTTP_PROXY'] = proxy
+    logger.debug('HTTP_PROXY={:s}'.format(os.environ['HTTP_PROXY']))
     os.environ['HTTPS_PROXY'] = proxy
+    logger.debug('HTTPS_PROXY={:s}'.format(os.environ['HTTPS_PROXY']))
 
 
 def get_team_stats(token=None, team=None, proxy=None):
-    logger.info('getting team statistics')
+    logger.info('Getting team statistics')
 
     _set_proxy(proxy)
 
@@ -30,22 +33,25 @@ def get_team_stats(token=None, team=None, proxy=None):
     header = dict(Authorization='Bearer %s' % token)
 
     res = requests.get(url, headers=header)
-    logger.info(res)
+    if res.status_code != 200:
+        logger.warning('Getting team statistics failed.')
+        raise RuntimeError('Getting team statistics failed.')
+    logger.debug(res)
 
     d = res.json()
-
-    print(d)
+    logger.debug(d)
     return d
 
 
 def upload_binary(filename, token=None, team=None, proxy=None):
     path_bin = Path(filename)
-    logger.info('uploading binary, %s' % str(path_bin))
+    logger.info('Uploading binary data, path=%s' % str(path_bin))
     logger.info('  filesize: %d' % path_bin.stat().st_size)
 
     _set_proxy(proxy)
 
     # get metadata
+    logger.info('Obtaining metadata for upload...')
     url = 'https://api.esa.io/v1/teams/%s/attachments/policies' % team
     header = dict(Authorization='Bearer %s' % token)
     params = dict(type=mimetypes.guess_type(str(path_bin))[0],
@@ -60,10 +66,11 @@ def upload_binary(filename, token=None, team=None, proxy=None):
     metadata = res.json()
     image_url = metadata['attachment']['url']
 
-    logger.info('  metadata is obtained.')
+    logger.info('  finished.')
     logger.debug(metadata)
 
     # upload file
+    logger.info('Posting binary...')
     url = metadata['attachment']['endpoint']
     with path_bin.open('rb') as imgfile:
         params = metadata['form']
@@ -73,13 +80,34 @@ def upload_binary(filename, token=None, team=None, proxy=None):
     if not (200 <= res.status_code < 300):
         logger.warning('Upload failed, %s' % str(path_bin))
         raise RuntimeError('Upload failed.')
-    logger.info('  the file is successfully uploaded, url: %s' % image_url)
+    logger.info('The file has been uploaded successfully, url: %s' % image_url)
 
     return image_url
 
 
+def get_post(post_number, token=None, team=None, proxy=None):
+    logger.info('Getting post/{:d}'.format(post_number))
+
+    _set_proxy(proxy)
+
+    # get metadata
+    url = 'https://api.esa.io/v1/teams/{:s}/posts/{:d}'.format(team, post_number)
+    header = dict(Authorization='Bearer {:s}'.format(token))
+
+    res = requests.get(url, headers=header)
+    if res.status_code != 200:
+        logger.warning('Getting post failed.')
+        raise RuntimeError('Getting post failed.')
+    logger.info(res)
+
+    d = res.json()
+    logger.debug(d)
+
+    return d
+
+
 def create_post(body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None):
-    logger.info('uploading markdown')
+    logger.info('Creating new post')
 
     # post
     _set_proxy(proxy)
@@ -105,9 +133,13 @@ def create_post(body_md, token=None, team=None, name=None, tags=None, category=N
 
     d = res.json()
     logger.debug(dict(d, **{'body_md': '<not shown>', 'body_html': '<not shown>'}))
-    print('New post was created, url: %s' % d['url'])
+    logger.info('URL of the created post: %s' % d['url'])
 
     return d['url']
+
+
+def patch_post(post_number, body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None):
+    pass
 
 
 if __name__ == '__main__':

@@ -47,6 +47,8 @@ def command_up_old(args):
             logger.info('opening edit page ...')
             webbrowser.open(edit_url, new=2)
 
+        print(post_url)
+
 
 def command_up(args):
     print(args)
@@ -55,8 +57,12 @@ def command_up(args):
 def command_stats(args):
     token, team = get_token_and_team(args)
 
-    get_team_stats(token=token, team=team,
-                   proxy=args.proxy)
+    try:
+        st = get_team_stats(token=token, team=team,
+                        proxy=args.proxy)
+        print(st)
+    except RuntimeError as e:
+        print('Failed: please check network settings (token, team, proxy)')
 
 
 def command_config(args):
