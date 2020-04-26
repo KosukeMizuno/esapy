@@ -12,7 +12,6 @@ from .api import get_team_stats, create_post
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
-root_logger = getLogger(__package__)
 logger = getLogger(__name__)
 
 
@@ -120,10 +119,12 @@ def main():
     args = parser.parse_args()
 
     # verbose level
-    if args.verbose >= 2:
-        root_logger.setLevel(DEBUG)
+    if args.verbose >= 3:
+        getLogger().setLevel(0)  # root logger
+    elif args.verbose >= 2:
+        getLogger(__package__).setLevel(DEBUG)  # package logger
     elif args.verbose >= 1:
-        root_logger.setLevel(INFO)
+        getLogger(__package__).setLevel(INFO)  # package logger
     logger.info('verbose level={:d}'.format(args.verbose))
 
     # call each function
