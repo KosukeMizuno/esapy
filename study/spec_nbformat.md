@@ -238,12 +238,18 @@ cell_type は次の3通り (raw, markdown, code) が存在する
 
 ### 折りたたみ
 
-- 出力をjupyter上で折りたたんだ場合、`cell.metadata.collapsed` と `cell.metadata.jupyter.outputs_hidden` が両方trueになる
-- 一方、ソースを折りたたんだ場合、`cell.metadata.jupyter.outputs_hidden` のみがtrueになる
+- codeセル
+  - 出力をjupyter上で折りたたんだ場合、`cell.metadata.collapsed` と `cell.metadata.jupyter.outputs_hidden` が両方trueになる。
+  - 一方、ソースを折りたたんだ場合、`cell.metadata.jupyter.outputs_hidden` のみがtrueになる
+- markdownセル
+  - `cell.metadata.jupyter.source_hiden`で制御されている
+- rawセル
+  - `cell.metadata.jupyter.source_hiden`で制御されている
 
 ### スクロール
 
 - セル出力をスクロール化にした場合、`cell.metadata.scrolled`がtrueになる
+- スクロールは出力に対してon/offできるようで、markdownセルに対してenable scrollしても変化しない
 
 
 

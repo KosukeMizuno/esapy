@@ -2,22 +2,25 @@
 title Upload process
 
 start
+
+if (check file type) then (not supported)
+    stop
+else (md, tex, ipynb)
+endif
+
 :Secure temporal working directory;
 
 partition Process_Images {
-    if (md file ?) then (y)
+    if (which type ?) then (md)
         :Upload local images;
-    elseif (tex file ?) then (y)
+    elseif (?) then (latex)
         :Call pandoc;
         :Upload local images;
-    elseif (ipynb file ?) then (y)
+    else (ipynb)
         :Secure temporal copy of ipynb file;
         :Upload local images;
         :Upload old output images;
         :Upload attached images;
-    else (other)
-        :Remove temporal files;
-        stop
     endif
     :Generate markdown for upload of which image references are replaced with uploaded url;
 }
