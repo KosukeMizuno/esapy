@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import shutil
+import tempfile
 import argparse
 import webbrowser
 
@@ -51,7 +53,59 @@ def command_up_old(args):
 
 
 def command_up(args):
-    print(args)
+    logger.info("starting 'esa up' ...")
+
+    # check file-type
+    path_input = Path(args.target).resolve()  # target file
+    path_root = Path(args.target).parent      # root of relative pathes
+    logger.info('input file={:s}'.format(str(path_input)))
+    logger.info('  filetype={:s}'.format(path_input.suffix))
+    if path_input.suffix not in ['.ipynb', '.md', '.tex']:
+        logger.warning('Unsupported input file type')
+        return
+    logger.info('input file at {:s}'.format(str(path_root)))
+
+    # secure temporal files
+    path_pwd = tempfile.mkdtemp(prefix=path_input.name, dir=path_input.parent)    # temporal working directory
+    path_md = tempfile.mkstemp(suffix='.md', dir=path_pwd)     # markdown file ready to be uploaded
+    path_ipynb = tempfile.mkstemp(suffix='.ipynb', dir=path_pwd)  # ipynb file to be output/overwritten
+    logger.debug('temporal working directory: {:s}'.format(str(path_pwd)))
+
+    # process image
+    if path_input.suffix == '.md':  # markdown
+        pass
+    elif path_input.suffix == '.latex':  # latex
+        pass
+    else:  # ipynb
+        pass
+
+    # show report of uploading images
+    pass
+
+    # mode check
+    should_be_published = True
+    if should_be_published:
+        pass
+    
+        # show report of uploading body
+        pass
+
+        # if succeeded, open browser in edit page
+        pass
+
+    # finalize
+    pass  # no_output ==> do nothing
+    pass  # ipynb & destructive_mode ==> overwrite
+    pass  # ipynb & output_addressed ==> save as ipynb
+    pass  # md & destructive_mode ==> do nothing
+    pass  # md & ouput_addressed ==> save as replaced md
+    pass  # tex & destructive_mode ==> do nothing
+    pass  # tex & output_addressed ==> save as replaced md
+
+    # remove temporal files & directory
+    logger.debug('removing temporal working directory')
+    shutil.rmtree(path_pwd)
+    logger.info("'esa up' finished.")
 
 
 def command_stats(args):
@@ -59,7 +113,7 @@ def command_stats(args):
 
     try:
         st = get_team_stats(token=token, team=team,
-                        proxy=args.proxy)
+                            proxy=args.proxy)
         print(st)
     except RuntimeError as e:
         print('Failed: please check network settings (token, team, proxy)')
@@ -132,6 +186,7 @@ def main():
     elif args.verbose >= 1:
         getLogger(__package__).setLevel(INFO)  # package logger
     logger.info('verbose level={:d}'.format(args.verbose))
+    logger.debug('args={:s}'.format(str(args)))
 
     # call each function
     args.handler(args)
