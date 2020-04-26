@@ -24,7 +24,7 @@ def _show_configuration():
     except FileNotFoundError as e:
         print('  rcFile not found.')
 
-    if _load_token_from_environ() is not None:
+    if _get_token_from_environ() is not None:
         print('environment variables:')
         print('  %s=%s' % (KEY_TOKEN, os.environ.get(KEY_TOKEN, '')))
         print('  %s=%s' % (KEY_TEAM, os.environ.get(KEY_TEAM, '')))
@@ -36,26 +36,23 @@ def get_token_and_team(args):
     """
     x = None
 
-    x = _load_token_from_args(args)
+    x = _get_token_from_args(args)
     if x is not None:
         return x
 
-    x = _load_token_from_environ()
+    x = _get_token_from_environ()
     if x is not None:
         return x
 
-    x = _load_token_from_rcfile()
+    x = _get_token_from_rcfile()
     if x is not None:
         return x
 
     raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.' % (RCFILE, KEY_TOKEN, KEY_TEAM))
 
 
-def _load_token_from_args(args):
-    try:
-        token, team = args.token, args.team
-    except AttributeError:
-        return None
+def _get_token_from_args(args):
+    token, team = args.token, args.team
 
     if token is not None and team is not None:
         return token, team
@@ -63,7 +60,7 @@ def _load_token_from_args(args):
         return None
 
 
-def _load_token_from_environ():
+def _get_token_from_environ():
     try:
         return os.environ[KEY_TOKEN], os.environ[KEY_TEAM]
     except KeyError:
@@ -88,7 +85,7 @@ def _load_rcfile():
     return y
 
 
-def _load_token_from_rcfile():
+def _get_token_from_rcfile():
     x = None
 
     y = _load_rcfile()
