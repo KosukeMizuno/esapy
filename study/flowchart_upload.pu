@@ -36,6 +36,8 @@ else (yes)
                     if (force_new_post mode ?) then (yes)
                         :Create new post;
                     else (no)
+                        :Gather post info;
+                        :Make attributes for new post;
                         :Patch the post;
                     endif
                 else (yes)
