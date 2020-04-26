@@ -1,0 +1,20 @@
+@startuml
+title Upload Images in markdown file
+
+start
+
+while (End of line ?)
+    :Pop the next line;
+
+    :Count image references (md) and img tags (html) in a line;
+
+    while (end ?)
+        :Solve path for the image;
+        :Upload data;
+    endwhile
+
+endwhile
+
+stop
+
+@enduml
