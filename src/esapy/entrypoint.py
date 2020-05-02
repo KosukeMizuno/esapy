@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-import shutil
-import tempfile
 import argparse
 import webbrowser
 
+from .processor import EsapyProcessorBase, MarkdownProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
-from .replace import _replace, _get_tempfile, _get_output_path, _remove_tempfile
-from .convert import _call_converter
-from .api import get_team_stats, create_post
+from .api import get_team_stats
 
 
 # logger
@@ -56,44 +53,39 @@ def command_up(args):
     logger.info("starting 'esa up' ...")
 
     # check file-type
-    path_input = Path(args.target).resolve()  # target file
-    path_root = Path(args.target).parent      # root of relative pathes
-    logger.info('input file={:s}'.format(str(path_input)))
-    logger.info('  filetype={:s}'.format(path_input.suffix))
-    if path_input.suffix not in ['.ipynb', '.md', '.tex']:
+    suffix = Path(args.target).suffix
+    proc_dict = {'.ipynb': EsapyProcessorBase,
+                 '.md': MarkdownProcessor,
+                 '.tex': EsapyProcessorBase}
+    if suffix not in proc_dict.keys():
         logger.warning('Unsupported input file type')
         return
-    logger.info('input file at {:s}'.format(str(path_root)))
+    proc_class = proc_dict[suffix]
+    logger.info('Processoer={:s} is selected.'.format(proc_class.__name__))
 
-    # secure temporal files
-    path_pwd = tempfile.mkdtemp(prefix=path_input.name, dir=path_input.parent)    # temporal working directory
-    path_md = tempfile.mkstemp(suffix='.md', dir=path_pwd)     # markdown file ready to be uploaded
-    path_ipynb = tempfile.mkstemp(suffix='.ipynb', dir=path_pwd)  # ipynb file to be output/overwritten
-    logger.debug('temporal working directory: {:s}'.format(str(path_pwd)))
+    # set token & team
+    args_dict = dict(vars(args))
+    token, team = get_token_and_team(args)
+    args_dict['token'] = token
+    args_dict['team'] = team
 
-    # process image
-    if path_input.suffix == '.md':  # markdown
-        pass
-    elif path_input.suffix == '.latex':  # latex
-        pass
-    else:  # ipynb
-        pass
+    # process start
+    with proc_class(**args_dict) as proc:
+        proc.preprocess()
 
-    # show report of uploading images
-    pass
+        # mode check
+        should_be_published = True
+        if should_be_published:
+            proc.upload_body()
 
-    # mode check
-    should_be_published = True
-    if should_be_published:
-        pass
-    
-        # show report of uploading body
-        pass
+            # show report of uploading body
+            pass
 
-        # if succeeded, open browser in edit page
-        pass
+            # if succeeded, open browser in edit page
+            pass
 
-    # finalize
+        # finalize
+        proc.save()
     pass  # no_output ==> do nothing
     pass  # ipynb & destructive_mode ==> overwrite
     pass  # ipynb & output_addressed ==> save as ipynb
@@ -101,11 +93,6 @@ def command_up(args):
     pass  # md & ouput_addressed ==> save as replaced md
     pass  # tex & destructive_mode ==> do nothing
     pass  # tex & output_addressed ==> save as replaced md
-
-    # remove temporal files & directory
-    logger.debug('removing temporal working directory')
-    shutil.rmtree(path_pwd)
-    logger.info("'esa up' finished.")
 
 
 def command_stats(args):
