@@ -6,6 +6,7 @@ import tempfile
 import re
 from urllib.parse import unquote
 import yaml
+import subprocess
 
 from .api import upload_binary, create_post, patch_post
 from .loadrc import get_token_and_team
@@ -254,7 +255,7 @@ class MarkdownProcessor(EsapyProcessorBase):
         info_dict = self.gather_post_info()
         logger.debug(info_dict)
 
-        post_number = self.is_uploaded()
+        post_number = self.get_post_number()
         if post_number is None:
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = create_post(md_body,
@@ -368,12 +369,68 @@ class MarkdownProcessor(EsapyProcessorBase):
 
         return d
 
-    def is_uploaded(self):
+    def get_post_number(self):
         '''YAML formatter をみて、アップロード履歴があるかどうか確認する
         アップロード済み: post_number
         アップロード初めて: None
         '''
         if self.input_yaml_frontmatter is None:
             return None
+        elif 'number' not in self.input_yaml_frontmatter:
+            return None
 
-        return self.input_yaml_frontmatter.get('number', None)
+        return self.input_yaml_frontmatter['number']
+
+    def is_uploaded(self):
+        n = self.get_post_number()
+        return n is not None
+
+class TexProcessor(MarkdownProcessor):
+    '''pandoc を読んで、その出力をpath_inputにしてからMarkdownProcessor（親クラス）にわたす
+    '''
+
+    FILETYPE_SUFFIX = '.tex'
+
+    def is_uploaded(self):
+        return False
+
+    def preprocess(self):
+        logger.info('Calling pandoc')
+        cmd = ['pandoc',
+               '-s', '{:s}'.format(str(self.path_input)),
+               '-o', '{:s}'.format(str(self.path_md))]
+        logger.debug(cmd)
+        
+        res = subprocess.check_call(cmd)
+        logger.debug(res)
+
+        self.path_input = self.path_md
+
+        # call preprocess of MarkdownProcessor
+        super().preprocess()
+
+    def gather_post_info(self):
+        return self.args
+
+    def save(self):
+        '''動作モードに応じて出力されたmdファイルを保存する
+        '''
+        if self.args['output'] is not None:
+            with self.path_orig_body.open('r', encoding='utf-8') as f:
+                md_body = f.readlines()
+                md_body = ''.join(md_body)
+            yf = self._get_yaml_frontmatter()
+            logger.debug('YAML frontmatter:')
+            logger.debug('{:s}'.format(yf))
+            md_body = yf + md_body
+
+            # output が指定されている
+            p = Path(self.args['output'])
+            logger.info('output file path={:s}'.format(str(p)))
+            p.open('w', encoding='utf-8').writelines(md_body)
+
+        elif self.args['destructive']:
+            logger.info('Nothing was done at #save in destructive mode of TexProcessor.')
+
+        else:
+            logger.info('no-output mode')

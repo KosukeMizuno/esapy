@@ -5,7 +5,7 @@ import argparse
 import webbrowser
 import sys
 
-from .processor import EsapyProcessorBase, MarkdownProcessor
+from .processor import EsapyProcessorBase, MarkdownProcessor, TexProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
 
@@ -57,7 +57,7 @@ def command_up(args):
     suffix = Path(args.target).suffix
     proc_dict = {'.ipynb': EsapyProcessorBase,
                  '.md': MarkdownProcessor,
-                 '.tex': EsapyProcessorBase}
+                 '.tex': TexProcessor}
     if suffix not in proc_dict.keys():
         logger.warning('Unsupported input file type')
         return
