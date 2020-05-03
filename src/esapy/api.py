@@ -82,7 +82,7 @@ def upload_binary(filename, token=None, team=None, proxy=None):
         raise RuntimeError('Upload failed.')
     logger.info('The file has been uploaded successfully, url: %s' % image_url)
 
-    return image_url
+    return image_url, res
 
 
 def get_post(post_number, token=None, team=None, proxy=None):
@@ -135,11 +135,42 @@ def create_post(body_md, token=None, team=None, name=None, tags=None, category=N
     logger.debug(dict(d, **{'body_md': '<not shown>', 'body_html': '<not shown>'}))
     logger.info('URL of the created post: %s' % d['url'])
 
-    return d['url']
+    return d['url'], res
 
 
 def patch_post(post_number, body_md, token=None, team=None, name=None, tags=None, category=None, wip=True, message=None, proxy=None):
-    pass
+    logger.info('Updating post/{:d}'.format(post_number))
+
+    # post
+    _set_proxy(proxy)
+    url = 'https://api.esa.io/v1/teams/{:s}/posts/{:d}'.format(team, post_number)
+    header = {'Authorization': 'Bearer {:s}'.format(token),
+              'Content-Type': 'application/json'}
+
+    params = dict(post=dict(name=name or "",
+                            message=message or "Update post via esapy",
+                            body_md=body_md,
+                            wip=wip))
+    if isinstance(tags, list) and all([isinstance(t, str) for t in tags]):
+        params['post']['tags'] = tags
+    if category is not None:
+        params['post']['category'] = category
+
+    res = requests.patch(url, headers=header, data=json.dumps(params))
+    logger.debug(res)
+
+    if res.status_code != 201:
+        raise RuntimeError('Create post failed.')
+    logger.info('New post was successfully created.')
+
+    d = res.json()
+    logger.debug(dict(d, **{'body_md': '<not shown>', 'body_html': '<not shown>'}))
+    logger.info('URL of the created post: %s' % d['url'])
+
+    if d['overlapped']:
+        logger.warning('!!! 3 way merge and conflicting has been occured !!!')
+
+    return d['url'], res
 
 
 if __name__ == '__main__':

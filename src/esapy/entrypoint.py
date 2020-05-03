@@ -70,29 +70,45 @@ def command_up(args):
     args_dict['team'] = team
 
     # process start
+    browser_flg = False  # flag to open browser after uploading body
     with proc_class(**args_dict) as proc:
-        proc.preprocess()
+        # upload images
+        res_preprocess = proc.preprocess()
 
         # mode check
-        should_be_published = True
-        if should_be_published:
-            proc.upload_body()
+        if args.publish_mode == 'force':
+            publish_flg = True
+        elif args.publish_mode == 'check':
+            publish_flg = res_preprocess
+        else:  # 'skip'
+            publish_flg = False
+        logger.info('publish mode={:s}, result of preprocess={:s}, ... publish: {:s}'
+                    .format(args.publish_mode, str(res_preprocess), str(publish_flg)))
 
-            # show report of uploading body
-            pass
-
-            # if succeeded, open browser in edit page
-            pass
+        # publish body
+        if publish_flg:
+            try:
+                post_url = proc.upload_body()
+                browser_flg = args.browser
+                logger.info('post_url={:s}'.format(post_url))
+            except RuntimeError as e:
+                logger.warn(e)
 
         # finalize
         proc.save()
     pass  # no_output ==> do nothing
     pass  # ipynb & destructive_mode ==> overwrite
     pass  # ipynb & output_addressed ==> save as ipynb
-    pass  # md & destructive_mode ==> do nothing
+    pass  # md & destructive_mode ==> save input with YAML formatter
     pass  # md & ouput_addressed ==> save as replaced md
     pass  # tex & destructive_mode ==> do nothing
     pass  # tex & output_addressed ==> save as replaced md
+
+    # if succeeded, open browser in edit page
+    if browser_flg:
+        edit_url = post_url + '/edit'
+        logger.info('opening edit page={:s}'.format(edit_url))
+        webbrowser.open(edit_url, new=2)
 
 
 def command_stats(args):
@@ -135,7 +151,7 @@ g_up_esa = parser_up.add_argument_group('optional arguments for esa.io post attr
 g_up_esa.add_argument('--name', metavar='<post title>')
 g_up_esa.add_argument('--category', metavar='<post category>')
 g_up_esa.add_argument('--message', metavar='<post message>')
-g_up_esa.add_argument('--tag', metavar='<post tag>', action='append', help='if your want to assign some tags, `--tag XXX --tag YYY`')
+g_up_esa.add_argument('--tag', dest='tags', metavar='<post tag>', action='append', help='if your want to assign some tags, `--tag XXX --tag YYY`')
 g_up_wip = g_up_esa.add_mutually_exclusive_group()
 g_up_wip.add_argument('--wip', action='store_true', default=True, help='[default]')
 g_up_wip.add_argument('--no-wip', dest='wip', action='store_false')

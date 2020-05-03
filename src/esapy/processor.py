@@ -5,8 +5,9 @@ import shutil
 import tempfile
 import re
 from urllib.parse import unquote
+import yaml
 
-from .api import upload_binary, create_post
+from .api import upload_binary, create_post, patch_post
 from .loadrc import get_token_and_team
 
 # logger
@@ -29,6 +30,7 @@ class EsapyProcessorBase(object):
     def __init__(self, **kwargs):
         logger.info('Initializing processor={:s}'.format(self.__class__.__name__))
         self.args = dict(kwargs)
+        self.result_preprocess = self.result_upload = self.post_info = None
 
         self.path_input = Path(self.args['target']).resolve()  # target file
         logger.info('  input file={:s}'.format(str(self.path_input)))
@@ -85,86 +87,268 @@ class EsapyProcessorBase(object):
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
         '''
+        if self.args['output'] is not None:
+            # output が指定されている
+            pass
+        elif self.args['destructive']:
+            # destructive mode
+            pass
+        else:
+            # no-output mode
+            pass
+
+    def is_uploaded(self):
+        '''アップロード履歴があるかどうか確認する
+
+        あるなら、post_number を返す
+        なければ None を返す
+        '''
+        pass
+
+    def gather_post_info(self):
+        '''gathering informatin for create/update post
+
+        アップロード済みのmdなら、過去のyamlfrontmatterを基本にする
+        引数による指定があればそちらを優先する
+        tagに関しては上書きではなく追加していく
+
+        Return: <dict>
+          k/v ... 'name', 'tag', 'category','message': str
+                  'wip': bool
+        '''
         pass
 
 
 class MarkdownProcessor(EsapyProcessorBase):
     FILETYPE_SUFFIX = '.md'
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.input_yaml_frontmatter = None
+
     def preprocess(self):
         '''前から一行ずつ処理して画像をアップしていく
         処理後は一時mdファイルに保存する
+        YAML frontmatter があれば、除去しておく
         '''
         logger.info('Replacing & uploading images in target markdown file...')
 
         # replace & upload
-        logger.info('Finding img tags ...')
+        md_body_modified = []  # intermediate md
+        res = []
         with self.path_input.open('r', encoding='utf-8') as f:
             md_body = f.readlines()
-            md_body_modified = []
 
-            for i, l in enumerate(md_body):
-                _l = self._replace_line(i, l)
+            # check yaml frontmatter
+            if md_body[0].strip() == '---':  # yaml frontmatter exists
+                for i, l in enumerate(md_body[1:]):  # find end of frontmatter, '---'
+                    if l.strip() == '---':
+                        ind_start_body = i + 1  # はじめの'---'を除いた分、一つずれてる
+                        break
+                yf = md_body[1:ind_start_body]  # frontmatter without '---'
+                self.input_yaml_frontmatter = yaml.load(''.join(yf))
+                logger.info('YAML frontmatter is detected in input file.')
+                logger.debug(self.input_yaml_frontmatter)
+            else:
+                ind_start_body = -1
+                logger.debug('YAML frontmatter is not detected in input file.')
+
+            # process each line
+            for i, l in enumerate(md_body[ind_start_body + 1:]):
+                _l, _res = self._replace_line(i, l)
                 md_body_modified.append(_l)
+                res.extend(_res)
 
         logger.info('Replacing finished.')
+        logger.debug(res)
+        count_images = len([r for r in res if r[2] != 'http'])  # images which should be uploaded
+        count_success = [r[2] for r in res].count('upload scceeded')  # images which are uploaded successfully
+        logger.info('  {:d} image tags to be uploaded are detected.'.format(count_images))
+        logger.info('  {:d} images are uploaded successfully.'.format(count_success))
+        self.result_preprocess = (count_images == count_success)  # Are all uploadings succeeded ?
 
         # save intermediate markdown
         self.path_md.open('w', encoding='utf-8').writelines(md_body_modified)
         logger.info('Intermediate markdown file has been saved.')
 
-    def upload_body(self):
-        pass
-
-    def save(self):
-        pass
+        return self.result_preprocess
 
     def _replace_line(self, i, l):
-        '''一行分の処理
-
-        画像タグを探して、あったらアップロード
-        URLを取得して置き換えた一行を返す
+        '''process single line
         '''
+        res = []  # line, path,
+
         # find image tags
         matches = list(re.finditer(r'!\[(.*?)\]\((.+?)\)', l))
         if len(matches) > 1:
             logger.info('#{:d} line, {:d} image tags are found.'.format(i, len(matches)))
+            logger.debug(l.strip())
         elif len(matches) == 1:
             logger.info('#{:d} line, an image tag is found.'.format(i))
+            logger.debug(l.strip())
         else:
             # logger.debug('#{:d} line, no image is detected.'.format(i))
-            return l
-
-        logger.debug(l)
+            return l, res
 
         # upload & replace
         _l = l
-        for m in matches[::-1]:
+        res = []
+        for m in matches[::-1]:  # 後ろから処理すると前にあるものはインデックスが変化しないので逆順に並べる
             # path を抽出
-            alttext, path_img = m.group(1), m.group(2)
-            if len(path_img) > 4 and path_img[:4] == 'http':
-                logger.info('  images referred via url -> pass, %s' % str(path_img))
+            alttext, fn_img = m.group(1), m.group(2)
+            if len(fn_img) > 4 and fn_img[:4] == 'http':
+                logger.info('  This image is referred via url={:s}'.format(fn_img))
+                res.append((i, fn_img, 'http'))
                 continue
-            logger.info('  upload ... %s' % str(path_img))
-            p = self.path_root / Path(unquote(path_img))
+            logger.info('  uploading, filepath={:s}'.format(fn_img))
+            path_img = self.path_root / Path(unquote(fn_img))
+            path_img = path_img.resolve()
 
             # パス解決できるか確認
-            pass
+            if not path_img.exists():
+                logger.warn('  File not found, {:s}'.format(str(path_img)))
+                res.append((i, str(path_img), 'file not found'))
+                continue
 
             # upload image
             try:
-                url = upload_binary(p.resolve(),
-                                    token=self.args['token'],
-                                    team=self.args['team'],
-                                    proxy=self.args['proxy'])
+                url, _ = upload_binary(path_img,
+                                       token=self.args['token'],
+                                       team=self.args['team'],
+                                       proxy=self.args['proxy'])
 
             except Exception as e:
                 logger.warning(e)
+                res.append((i, str(path_img), 'upload failed'))
 
+            else:  # upload succeeded.
+                # replace file path with URL
+                _l = _l[:m.start()] \
+                    + '![%s](%s)' % (alttext, url) \
+                    + _l[m.end():]
+                res.append((i, str(path_img), 'upload scceeded'))
+
+        return _l, res
+
+    def upload_body(self):
+        logger.info('Uploading markdown body ...')
+        with self.path_md.open('r', encoding='utf-8') as f:
+            md_body = f.readlines()
+            md_body = ''.join(md_body)
+
+        logger.info('Gathering information for create post')
+        info_dict = self.gather_post_info()
+        logger.debug(info_dict)
+
+        post_number = self.is_uploaded()
+        if post_number is None:
+            logger.info('This file has not been uploaded before. ==> create new post')
+            post_url, res = create_post(md_body,
+                                        name=info_dict['name'],
+                                        tags=info_dict['tags'],
+                                        category=info_dict['category'],
+                                        wip=info_dict['wip'],
+                                        message=info_dict['message'],
+                                        token=self.args['token'],
+                                        team=self.args['team'],
+                                        proxy=self.args['proxy'])
+        else:
+            logger.info('This file has been already uploaded. ==> patch the post')
+            post_url, res = patch_post(post_number, md_body,
+                                       name=info_dict['name'],
+                                       tags=info_dict['tags'],
+                                       category=info_dict['category'],
+                                       wip=info_dict['wip'],
+                                       message=info_dict['message'],
+                                       token=self.args['token'],
+                                       team=self.args['team'],
+                                       proxy=self.args['proxy'])
+
+        self.post_info = res.json()
+
+        return post_url
+
+    def save(self):
+        '''動作モードに応じて出力されたmdファイルを保存する
+        '''
+        with self.path_md.open('r', encoding='utf-8') as f:
+            md_body = f.readlines()
+            md_body = ''.join(md_body)
+        yf = self._get_yaml_frontmatter()
+        logger.debug('YAML frontmatter:')
+        logger.debug('{:s}'.format(yf))
+        md_body = yf + md_body
+
+        if self.args['output'] is not None:
+            # output が指定されている
+            p = Path(self.args['output'])
+            logger.info('output file path={:s}'.format(str(p)))
+            p.open('w', encoding='utf-8').writelines(md_body)
+
+        elif self.args['destructive']:
+            p = self.path_input
+            logger.info('output file path is input file path={:s}'.format(str(p)))
+            p.open('w', encoding='utf-8').writelines(md_body)
+
+        else:
+            logger.info('no-output mode')
+
+    def _get_yaml_frontmatter(self):
+        '''get yaml frontmatter for save derived from HTTP_RESPONSE
+        '''
+        if self.post_info is None:
+            return ''
+
+        yf = ['---',
+              'title: "{:s}"'.format(self.post_info['name']),
+              'category: {:s}'.format(self.post_info['category']),
+              'tags: {:s}'.format(', '.join(self.post_info['tags'])),
+              'created_at: {:s}'.format(self.post_info['created_at']),
+              'updated_at: {:s}'.format(self.post_info['updated_at']),
+              'published: {:s}'.format(str(self.post_info['wip']).lower()),
+              'number: {:s}'.format(str(self.post_info['number'])),
+              '---\n']
+        yf = '\n'.join(yf)
+        return yf
+
+    def gather_post_info(self):
+        '''gathering informatin for create/update post
+
+        アップロード済みのmdなら、過去のyamlfrontmatterを基本にする
+        引数による指定があればそちらを優先する
+        tagに関しては上書きではなく追加していく
+
+        Return: <dict>
+          k/v ... 'name', 'tag', 'category','message': str
+                  'wip': bool
+        '''
+        d = self.input_yaml_frontmatter if self.input_yaml_frontmatter is not None else {}
+
+        # manage tags (None or list)
+        d['tags'] = d.get('tags', '').split(', ') if d.get('tags', '') is not None else []
+        if self.args['tags'] is not None:
+            d['tags'].extend(self.args['tags'])
+        print(self.args['tags'], d['tags'])
+        d['tags'] = list(set(d['tags']))  # unique
+
+        # wip (bool)
+        d['wip'] = self.args['wip'] if self.args['wip'] is not None else d.get('wip', '')
+
+        # name, category, message (None or str)
+        for k in ['name', 'category', 'message']:
+            if self.args[k] is not None:
+                d[k] = self.args[k]
             else:
-                # upload succeeded.
-                _l = _l[:m.start()] + '![%s](%s)' % (alttext, url) + _l[m.end():]
+                d[k] = d.get(k, None)
 
-                pass #ここappendにしないとダメでは？
+        return d
 
-        return _l
+    def is_uploaded(self):
+        '''YAML formatter をみて、アップロード履歴があるかどうか確認する
+        アップロード済み: post_number
+        アップロード初めて: None
+        '''
+        if self.input_yaml_frontmatter is None:
+            return None
+
+        return self.input_yaml_frontmatter.get('number', None)
