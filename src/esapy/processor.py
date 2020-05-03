@@ -146,7 +146,7 @@ class MarkdownProcessor(EsapyProcessorBase):
                         ind_start_body = i + 1  # はじめの'---'を除いた分、一つずれてる
                         break
                 yf = md_body[1:ind_start_body]  # frontmatter without '---'
-                self.input_yaml_frontmatter = yaml.load(''.join(yf))
+                self.input_yaml_frontmatter = yaml.safe_load(''.join(yf))
                 logger.info('YAML frontmatter is detected in input file.')
                 logger.debug(self.input_yaml_frontmatter)
             else:
@@ -265,11 +265,14 @@ class MarkdownProcessor(EsapyProcessorBase):
                                        proxy=self.args['proxy'])
 
         self.post_info = res.json()
+        self.result_upload = True
 
         return post_url
 
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
+
+        TODO: URL置き換え後のmdではなくて、入力されたmdファイルの yaml frontmatterだけ書き換えたものを保存したい
         '''
         with self.path_md.open('r', encoding='utf-8') as f:
             md_body = f.readlines()
@@ -286,9 +289,12 @@ class MarkdownProcessor(EsapyProcessorBase):
             p.open('w', encoding='utf-8').writelines(md_body)
 
         elif self.args['destructive']:
-            p = self.path_input
-            logger.info('output file path is input file path={:s}'.format(str(p)))
-            p.open('w', encoding='utf-8').writelines(md_body)
+            if self.result_upload:
+                p = self.path_input
+                logger.info('output file path is input file path={:s}'.format(str(p)))
+                p.open('w', encoding='utf-8').writelines(md_body)
+            else:
+                logger.info('uploading body was failed, so saving is skipped.')
 
         else:
             logger.info('no-output mode')
@@ -305,7 +311,7 @@ class MarkdownProcessor(EsapyProcessorBase):
               'tags: {:s}'.format(', '.join(self.post_info['tags'])),
               'created_at: {:s}'.format(self.post_info['created_at']),
               'updated_at: {:s}'.format(self.post_info['updated_at']),
-              'published: {:s}'.format(str(self.post_info['wip']).lower()),
+              'published: {:s}'.format(str(not self.post_info['wip']).lower()),
               'number: {:s}'.format(str(self.post_info['number'])),
               '---\n']
         yf = '\n'.join(yf)
@@ -317,29 +323,36 @@ class MarkdownProcessor(EsapyProcessorBase):
         アップロード済みのmdなら、過去のyamlfrontmatterを基本にする
         引数による指定があればそちらを優先する
         tagに関しては上書きではなく追加していく
+        既にwip=falseの場合は、実行時引数を無視してwip=falseのままにする
 
         Return: <dict>
           k/v ... 'name', 'tag', 'category','message': str
                   'wip': bool
         '''
-        d = self.input_yaml_frontmatter if self.input_yaml_frontmatter is not None else {}
+        yf = self.input_yaml_frontmatter if self.input_yaml_frontmatter is not None else {}
+        d = {}
 
         # manage tags (None or list)
-        d['tags'] = d.get('tags', '').split(', ') if d.get('tags', '') is not None else []
+        d['tags'] = yf.get('tags', '').split(', ') if yf.get('tags', '') is not None else []
         if self.args['tags'] is not None:
             d['tags'].extend(self.args['tags'])
-        print(self.args['tags'], d['tags'])
         d['tags'] = list(set(d['tags']))  # unique
 
         # wip (bool)
-        d['wip'] = self.args['wip'] if self.args['wip'] is not None else d.get('wip', '')
+        d['wip'] = not (not self.args['wip'] or yf.get('published', False))
 
-        # name, category, message (None or str)
-        for k in ['name', 'category', 'message']:
+        # category, message (None or str)
+        for k in ['category', 'message']:
             if self.args[k] is not None:
                 d[k] = self.args[k]
             else:
-                d[k] = d.get(k, None)
+                d[k] = yf.get(k, None)
+
+        # name in args > title in yaml-frontmatter
+        if self.args['name'] is not None:
+            d['name'] = self.args['name']
+        else:
+            d['name'] = yf.get('title', None)
 
         return d
 

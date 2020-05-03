@@ -3,6 +3,7 @@
 from pathlib import Path
 import argparse
 import webbrowser
+import sys
 
 from .processor import EsapyProcessorBase, MarkdownProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
@@ -92,7 +93,9 @@ def command_up(args):
                 browser_flg = args.browser
                 logger.info('post_url={:s}'.format(post_url))
             except RuntimeError as e:
+                tb = sys.exc_info()[2]
                 logger.warn(e)
+                logger.warn(e.with_traceback(tb))
 
         # finalize
         proc.save()
@@ -107,7 +110,8 @@ def command_up(args):
     # if succeeded, open browser in edit page
     if browser_flg:
         edit_url = post_url + '/edit'
-        logger.info('opening edit page={:s}'.format(edit_url))
+        logger.info('edit page={:s}'.format(edit_url))
+        print('edit page URL ... {:s}'.format(edit_url))
         webbrowser.open(edit_url, new=2)
 
 
