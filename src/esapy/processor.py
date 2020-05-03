@@ -7,6 +7,8 @@ import re
 from urllib.parse import unquote
 import yaml
 import subprocess
+import base64
+import hashlib
 
 from .api import upload_binary, create_post, patch_post
 from .loadrc import get_token_and_team
@@ -489,3 +491,116 @@ class IpynbProcessor_via_nbconvert(MarkdownProcessor):
 
         else:
             logger.info('no-output mode')
+
+
+class IpynbProcessor(EsapyProcessorBase):
+    FILETYPE_SUFFIX = '.ipynb'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.metadata = None
+
+    def __enter__(self):
+        super().__enter__()
+
+        # intermediate ipynb file
+        _, self.path_ipynb = tempfile.mkstemp(suffix='.ipynb', dir=self.path_pwd)
+        self.path_ipynb = Path(self.path_ipynb)
+        logger.info('  intermediate ipynb file={:s}'.format(str(self.path_ipynb)))
+
+        return self
+
+    def preprocess(self):
+        pass
+
+    def upload_body(self):
+        pass
+
+    def save(self):
+        pass
+
+    def _process_cell_raw(self, cell_raw):
+        pass
+
+    def _process_cell_md(self, cell_md):
+        pass
+
+    def _process_cell_code(self, cell_code):
+        pass
+
+    def _process_output_stream(self, output_stream):
+        pass
+
+    def _process_output_result(self, output_result):
+        pass
+
+    def _process_output_disp(self, output_disp):
+        pass
+
+    def _process_output_error(self, output_error):
+        pass
+
+    def _upload_image_and_get_url(self, path_img):
+        '''filepathからsha256を計算、ハッシュリストを参照してアップロード済みか確認する
+        未アップならアップロードしてURLを返す
+        アップ済みならURLを返す
+        '''
+        pass
+
+    def _save_encodedimage(self, s_b64):
+        '''base64-encoded-multiline-png-data を一時ファイルに保存して、ファイルパスを返す
+        '''
+        p = self._mkstemp(suffix='.png')
+        with open(fn_testpng, 'wb') as f:
+            dat = base64.b64decode(s_b64)
+            f.write(dat)
+        return p
+
+    def _mkstemp(self, **kwargs):
+        '''一時ファイルを確保してファイルパスを返す
+        '''
+        args = dict(dict(dir=self.path_pwd), **kwargs)
+        _, fn_tmp = tempfile.mkstemp(**args)
+        return Path(fn_tmp)
+
+    def _get_sha256(self, path_file):
+        '''指定したファイルのsha256を算出
+        '''
+        m = hashlib.sha256()
+        with Path(path_file).open('rb') as f:
+            m.update(f.read())
+        return m.hexdigest()
+
+
+if __name__ == '__main__':
+    import os
+    import json
+    path_input = Path('test_nbformat.json')
+
+    with path_input.open('r', encoding='utf-8') as f:
+        ipynb_json = json.load(f)
+
+    print(ipynb_json['cells'][7])
+    print(ipynb_json['metadata'])
+
+    # attachement 抽出のテスト
+    cell = ipynb_json['cells'][7]
+
+    import base64
+    fn_testpng = 'attachment_test.png'
+    with open(fn_testpng, 'wb') as f:
+        dat = cell['attachments']['image.png']['image/png']
+        en_dat = base64.b64decode(dat)
+        f.write(en_dat)
+
+    # sha256
+    import hashlib
+    m = hashlib.sha256()
+    m.update(en_dat)
+    print(m.hexdigest())
+
+    # sha256 from file
+    m_file = hashlib.sha256()
+    with open(fn_testpng, 'rb') as f:
+        m_file.update(f.read())
+        print(m_file.hexdigest())
