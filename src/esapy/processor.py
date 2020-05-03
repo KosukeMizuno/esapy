@@ -385,6 +385,7 @@ class MarkdownProcessor(EsapyProcessorBase):
         n = self.get_post_number()
         return n is not None
 
+
 class TexProcessor(MarkdownProcessor):
     '''pandoc を読んで、その出力をpath_inputにしてからMarkdownProcessor（親クラス）にわたす
     '''
@@ -400,7 +401,7 @@ class TexProcessor(MarkdownProcessor):
                '-s', '{:s}'.format(str(self.path_input)),
                '-o', '{:s}'.format(str(self.path_md))]
         logger.debug(cmd)
-        
+
         res = subprocess.check_call(cmd)
         logger.debug(res)
 
@@ -431,6 +432,60 @@ class TexProcessor(MarkdownProcessor):
 
         elif self.args['destructive']:
             logger.info('Nothing was done at #save in destructive mode of TexProcessor.')
+
+        else:
+            logger.info('no-output mode')
+
+
+class IpynbProcessor_via_nbconvert(MarkdownProcessor):
+    '''nbconvert を呼んで、その出力をpath_inputにしてからMarkdownProcessor（親クラス）にわたす
+    '''
+
+    FILETYPE_SUFFIX = '.ipynb'
+
+    def is_uploaded(self):
+        return False
+
+    def preprocess(self):
+        logger.info('Calling pandoc')
+        cmd = ['jupyter', 'nbconvert',
+               '--to=markdown',
+               '--output={:s}'.format(str(self.path_md)),
+               '--output-dir={:s}'.format(str(self.path_pwd)),
+               '--log-level={:d}'.format(logger.level),
+               '{:s}'.format(str(self.path_input))]
+        logger.debug(cmd)
+
+        res = subprocess.check_call(cmd)
+        logger.debug(res)
+
+        self.path_input = self.path_md
+
+        # call preprocess of MarkdownProcessor
+        super().preprocess()
+
+    def gather_post_info(self):
+        return self.args
+
+    def save(self):
+        '''動作モードに応じて出力されたmdファイルを保存する
+        '''
+        if self.args['output'] is not None:
+            with self.path_orig_body.open('r', encoding='utf-8') as f:
+                md_body = f.readlines()
+                md_body = ''.join(md_body)
+            yf = self._get_yaml_frontmatter()
+            logger.debug('YAML frontmatter:')
+            logger.debug('{:s}'.format(yf))
+            md_body = yf + md_body
+
+            # output が指定されている
+            p = Path(self.args['output'])
+            logger.info('output file path={:s}'.format(str(p)))
+            p.open('w', encoding='utf-8').writelines(md_body)
+
+        elif self.args['destructive']:
+            logger.info('Nothing was done at #save in destructive mode of IpynbProcessor_via_nbconvert.')
 
         else:
             logger.info('no-output mode')

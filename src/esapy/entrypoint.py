@@ -5,7 +5,7 @@ import argparse
 import webbrowser
 import sys
 
-from .processor import EsapyProcessorBase, MarkdownProcessor, TexProcessor
+from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor_via_nbconvert
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
 
@@ -55,7 +55,7 @@ def command_up(args):
 
     # check file-type
     suffix = Path(args.target).suffix
-    proc_dict = {'.ipynb': EsapyProcessorBase,
+    proc_dict = {'.ipynb': IpynbProcessor_via_nbconvert,
                  '.md': MarkdownProcessor,
                  '.tex': TexProcessor}
     if suffix not in proc_dict.keys():
