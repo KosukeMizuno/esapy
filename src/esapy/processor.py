@@ -126,6 +126,16 @@ class MarkdownProcessor(EsapyProcessorBase):
         super().__init__(**kwargs)
         self.input_yaml_frontmatter = None
 
+    def __enter__(self):
+        super().__enter__()
+
+        # original markdown file excluded yaml frontmatter
+        _, self.path_orig_body = tempfile.mkstemp(suffix='.md', dir=self.path_pwd)
+        self.path_orig_body = Path(self.path_orig_body)
+        logger.info('  original markdown file excluded YAML frontmatter={:s}'.format(str(self.path_orig_body)))
+
+        return self
+
     def preprocess(self):
         '''前から一行ずつ処理して画像をアップしていく
         処理後は一時mdファイルに保存する
@@ -152,6 +162,10 @@ class MarkdownProcessor(EsapyProcessorBase):
             else:
                 ind_start_body = -1
                 logger.debug('YAML frontmatter is not detected in input file.')
+
+            # save original markdown without YAML
+            self.path_orig_body.open('w', encoding='utf-8').writelines(md_body[ind_start_body + 1:])
+            logger.info('Original markdown body excluded YAML frontmatter has been saved.')
 
             # process each line
             for i, l in enumerate(md_body[ind_start_body + 1:]):
@@ -271,10 +285,8 @@ class MarkdownProcessor(EsapyProcessorBase):
 
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
-
-        TODO: URL置き換え後のmdではなくて、入力されたmdファイルの yaml frontmatterだけ書き換えたものを保存したい
         '''
-        with self.path_md.open('r', encoding='utf-8') as f:
+        with self.path_orig_body.open('r', encoding='utf-8') as f:
             md_body = f.readlines()
             md_body = ''.join(md_body)
         yf = self._get_yaml_frontmatter()
