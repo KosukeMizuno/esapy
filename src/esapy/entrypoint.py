@@ -15,41 +15,6 @@ from logging import getLogger, basicConfig, DEBUG, INFO
 logger = getLogger(__name__)
 
 
-def command_up_old(args):
-    # convert
-    path_md = _call_converter(args)
-    path_wd = path_md.parent
-
-    # replace
-    token, team = get_token_and_team(args)
-    path_output = _get_output_path(path_md, args.output, args.no_output, args.destructive)
-
-    body_md = _replace(path_input=path_md,
-                       path_wd=path_wd,
-                       path_output=path_output,
-                       clipboard=args.clipboard,
-                       token=token, team=team,
-                       proxy=args.proxy)
-
-    _remove_tempfile(path_output, args.output, args.no_output, args.destructive)
-
-    # publish
-    if args.publish:
-        post_url = create_post(body_md,
-                               name=args.name, tags=args.tag, category=args.category, wip=args.wip, message=args.message,
-                               token=token, team=team, proxy=args.proxy)
-
-        # TODO
-        # if publish is failed, output temp file should be regenerated.
-
-        if args.browser:
-            edit_url = post_url + '/edit'
-            logger.info('opening edit page ...')
-            webbrowser.open(edit_url, new=2)
-
-        print(post_url)
-
-
 def command_up(args):
     logger.info("starting 'esa up' ...")
 
@@ -99,13 +64,6 @@ def command_up(args):
 
         # finalize
         proc.save()
-    pass  # no_output ==> do nothing
-    pass  # ipynb & destructive_mode ==> overwrite
-    pass  # ipynb & output_addressed ==> save as ipynb
-    pass  # md & destructive_mode ==> save input with YAML formatter
-    pass  # md & ouput_addressed ==> save as replaced md
-    pass  # tex & destructive_mode ==> do nothing
-    pass  # tex & output_addressed ==> save as replaced md
 
     # if succeeded, open browser in edit page
     if browser_flg:
