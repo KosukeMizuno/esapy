@@ -542,7 +542,10 @@ class IpynbProcessor(EsapyProcessorBase):
         logger.info('Processing {:d} cells...'.format(len(self.nbjson['cells'])))
         md_body = []
         for cell in self.nbjson['cells']:
-            pass
+            proc_func = {'raw': self._process_cell_raw,
+                         'markdown': self._process_cell_md,
+                         'code': self._process_cell_code}[cell['cell_type']]
+            md_body.extend(proc_func(cell))
 
         # save temprorary files
         self.path_md.open('w', encoding='utf-8').writelines(md_body)
@@ -552,19 +555,140 @@ class IpynbProcessor(EsapyProcessorBase):
             logger.info('Intermediate ipynb file has been saved.')
 
     def _process_cell_raw(self, cell_raw):
-        pass
+        md = ['\n', '```\n']
+        md.extend(cell_raw['source'])
+        md[-1] = md[-1] + '\n'
+        md.extend(['```\n', '\n'])
+
+        # folding
+        if cell_raw.get('metadata', {}).get('jupyter', {}).get('source_hidden', False):
+            md = ['\n', '<details>\n', '<summary>hidden raw cell</summary>\n', '\n',
+                  *md,
+                  '\n', '</details>\n', '\n']
+
+        return md
 
     def _process_cell_md(self, cell_md):
-        pass
+        md = ['\n']
+        md.extend(cell_md['source'])
+        md[-1] = md[-1] + '\n'
+        md.extend(['\n'])
+
+        # attachment があったら抽出
+        at_images = {}  # key=attachment:(xxx.png), value=file name (str)
+        for at_name, v in cell_md.get('attachments', {}).items():
+            path_at = self._save_encodedimage(v['image/png'])
+            at_images[at_name] = str(path_at)
+
+        # マークダウン中の $$~$$ を ```math~``` にする
+        count_ddoller = 0
+        for i, l in enumerate(md):
+            if l != '$$\n':
+                continue
+
+            count_ddoller += 1
+
+            if count_ddoller // 2 = 1:
+                md[i] = '```math\n'
+            else:
+                md[i] = '```\n'
+
+        # attachment image を参照するimgタグがあったら抽出後のファイルパスで置き換え
+        for i, l in enumerate(md):
+            _l = l
+            matches = list(re.finditer(r'![(.*?)]\(attachment:(.+\.png)\)', l))
+            for m in matches[::-1]:
+                path_img = at_images.get(m.group(2), m.group(2))
+                _l = _l[:m.start()] \
+                    + '![%s](%s)' % (m.group(1), path_img) \
+                    + _l[m.end():]
+            md[i] = _l
+
+        # imgタグがあったらsha256からurlをゲットして、置き換え
+        for i, l in enumerate(md):
+            _l = l
+            matches = list(re.finditer(r'![(.*?)]\((.+\.png)\)', l))
+            for m in matches[::-1]:
+                path_img = Path(m.group(2))
+                try:
+                    url = self._upload_image_and_get_url()
+                except RuntimeError:
+                    url = str(path_img)
+                _l = _l[:m.start()] \
+                    + '![%s](%s)' % (m.group(1), url) \
+                    + _l[m.end():]
+            md[i] = _l
+
+        # folding
+        if cell_md.get('metadata', {}).get('jupyter', {}).get('source_hidden', False):
+            md = ['\n', '<details>\n', '<summary>hidden markdown cell</summary>\n', '\n',
+                  *md,
+                  '\n', '</details>\n', '\n']
+        return md
 
     def _process_cell_code(self, cell_code):
-        pass
+        md_source = ['\n', '```{:s}\n'.format(self.language)]
+        md_source.extend(cell_code['source'])
+        md_source[-1] = md_source[-1] + '\n'
+        md_source.extend(['```\n', '\n'])
+
+        # source folding
+        is_source_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
+        execution_count = cell_code.get('execution_count', 0)
+        md_source = ['\n',
+                     '<details>\n' if is_source_hidden else '<details open>\n',
+                     '<summary>[{:d}]: code source</summary>\n'.format(execution_count),
+                     '\n', *md, '\n', '</details>\n', '\n']
+
+        # outputs
+        func_dict = dict(stream=self._process_output_stream,
+                         execute_result=self._process_output_result,
+                         display_data=self._process_output_disp,
+                         error=self._process_output_error)
+        md_output = []
+        for b in cell_code['outputs']:
+            func = func_dict[b['output_type']]
+            md_output.extend(func(b))
+
+        # output folding
+        is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
+        md_source = ['\n',
+                     '<details>\n' if is_outputs_hidden else '<details open>\n',
+                     '<summary>[{:d}]: outputs</summary>\n'.format(execution_count),
+                     '\n', *md_output, '\n', '</details>\n', '\n']
+
+        md = md_source + md_output
+
+        # output scrolling
+        pass  # TODO
+
+        return md
 
     def _process_output_stream(self, output_stream):
-        pass
+        txt = [self._remove_ansi(l) for l in output_stream['text']]
+        return ['\n', '```\n'] + txt + ['```\n', '\n']
 
     def _process_output_result(self, output_result):
-        pass
+        if 'text/html' in output_result['data']:
+            md = ['\n'] + output_result['data']['text/html'] + ['\n']
+
+        elif 'text/latex' in output_result['data']:
+            md = output_result['data']['text/latex']
+            for i in range(len(md)):
+                md[i] = re.sub(r'\\\\', r'\\cr', md[i])
+                md[i] = re.sub(r'\\begin{equation\*}', r'\n```math\n\\begin{equation*}', md[i])
+                md[i] = re.sub(r'\\end{equation\*}', r'\\end{equation*}\n```\n', md[i])
+
+        else:  # text/plain
+            md = ['\n', '```\n'] + output_result['data'] + ['```\n', '\n']
+
+        # output count
+        execution_count = output_stream.get('execution_count', 0)
+        md_source = ['\n',
+                     '<details>\n' if is_source_hidden else '<details open>\n',
+                     '<summary>[{:d}]: code source</summary>\n'.format(execution_count),
+                     '\n', *md, '\n', '</details>\n', '\n']
+        return md_source
 
     def _process_output_disp(self, output_disp):
         pass
@@ -657,7 +781,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
         return d
 
-    def remove_ansi(self, s):
+    def _remove_ansi(self, s):
         return re.sub(r'\x1b[^m]*m', '', s)
 
 
