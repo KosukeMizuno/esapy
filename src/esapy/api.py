@@ -54,7 +54,9 @@ def upload_binary(filename, token=None, team=None, proxy=None):
     logger.info('Obtaining metadata for upload...')
     url = 'https://api.esa.io/v1/teams/%s/attachments/policies' % team
     header = dict(Authorization='Bearer %s' % token)
-    params = dict(type=mimetypes.guess_type(str(path_bin))[0],
+    mtype = mimetypes.guess_type(str(path_bin))[0]
+    mtype = mtype if mtype is not None else 'application/octet-stream'
+    params = dict(type=mtype,
                   name=path_bin.name,
                   size=path_bin.stat().st_size)
     res = requests.post(url, headers=header, params=params)

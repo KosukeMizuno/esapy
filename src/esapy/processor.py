@@ -800,6 +800,18 @@ class IpynbProcessor(EsapyProcessorBase):
         info_dict = self.gather_post_info()
         logger.debug(info_dict)
 
+        # upload ipynb itself and insert link
+        try:
+            ipynb_url, _ = upload_binary(self.path_input,
+                                         token=self.args['token'],
+                                         team=self.args['team'],
+                                         proxy=self.args['proxy'])
+
+            s_link = '[{:s}]({:s})\n\n'.format(str(self.path_input), ipynb_url)
+            md_body = s_link + md_body
+        except RuntimeError as e:
+            logger.warn('uploading ipynb file itself failed.')
+
         post_number = self.get_post_number()
         if post_number is None:
             logger.info('This file has not been uploaded before. ==> create new post')
