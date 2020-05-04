@@ -8,6 +8,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## [1.0.0] - 2020-05-05
+### Added
+- Enable folding in output markdown
+  - ignore: any cell will be opened.
+  - as-shown: cell folding obeys cell-metadata.
+  - auto: a code cell starting with `plt.figure` will be folded.
+- Hashlist of images
+  - Once a image has been uploaded, it will never upload again. Upload history is recorded in metadata.
+- Attachments
+  - attached images can be extracted and uploaded.
+- Math codeblock
+  - simple latex equation environment `$$ ... $$` will be replaced as math-code block for avoiding mathjax escape.
+- Work in temporary directory
+  - No temporary files leave after process.
+
+### Changed
+- Internal process has been almost rewritten.
+
+### Removed
+- subcommands
+
 ## [0.5.0] - 2020-03-04
 ### Added
 - Add output options
