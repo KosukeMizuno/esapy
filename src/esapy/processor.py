@@ -609,13 +609,16 @@ class IpynbProcessor(EsapyProcessorBase):
             _l = l
             matches = list(re.finditer(r'![(.*?)]\((.+\.png)\)', l))
             for m in matches[::-1]:
+                alttxt = m.group(1)
                 path_img = Path(m.group(2))
                 try:
                     url = self._upload_image_and_get_url()
                 except RuntimeError:
                     url = str(path_img)
+                    alttxt = alttxt + ' (upload failed)'
+
                 _l = _l[:m.start()] \
-                    + '![%s](%s)' % (m.group(1), url) \
+                    + '![%s](%s)' % (alttxt, url) \
                     + _l[m.end():]
             md[i] = _l
 
@@ -691,10 +694,25 @@ class IpynbProcessor(EsapyProcessorBase):
         return md_source
 
     def _process_output_disp(self, output_disp):
-        pass
+        md = []
+
+        if 'image/png' in output_disp['data']:
+            alttxt = output_disp['data'].get('text/plain', '')
+            path_img = self._save_encodedimage(output_disp['data']['image/png'])
+            try:
+                url = self._upload_image_and_get_url(path_img)
+                md.append('![{:s}]({:s})\n'.format(alttxt, url))
+            except RuntimeError:
+                md.append('<img src="data:image/png;base64,{:s}">\n'.format(output_disp['data']['image/png']))
+
+        else:
+            md.append('![no image display_data output (unsupported)](error.png)')
+
+        return md
 
     def _process_output_error(self, output_error):
-        pass
+        txt = [self._remove_ansi(l) + '\n' for l in output_error['traceback']]
+        return ['\n', '```\n'] + txt + ['```\n', '\n']
 
     def _upload_image_and_get_url(self, path_img):
         '''filepathからsha256を計算、ハッシュリストを参照してアップロード済みか確認する
@@ -743,7 +761,33 @@ class IpynbProcessor(EsapyProcessorBase):
         pass
 
     def save(self):
-        pass
+        '''動作モードに応じて出力されたmdファイルを保存する
+        '''
+        with self.path_orig_body.open('r', encoding='utf-8') as f:
+            md_body = f.readlines()
+            md_body = ''.join(md_body)
+        yf = self._get_yaml_frontmatter()
+        logger.debug('YAML frontmatter:')
+        logger.debug('{:s}'.format(yf))
+        md_body = yf + md_body
+
+        if self.args['output'] is not None:
+            # output が指定されている
+            p = Path(self.args['output'])
+            logger.info('output file path={:s}'.format(str(p)))
+            p.open('w', encoding='utf-8').writelines(md_body)
+
+        elif self.args['destructive']:
+            if self.result_upload:
+                p = self.path_input
+                logger.info('output file path is input file path={:s}'.format(str(p)))
+                p.open('w', encoding='utf-8').writelines(md_body)
+            else:
+                logger.info('uploading body was failed, so saving is skipped.')
+
+        else:
+            logger.info('no-output mode')
+
 
     def is_uploaded(self):
         '''アップロード履歴があるかどうか確認する
