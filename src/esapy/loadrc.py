@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from logging import getLogger
-
+logger = getLogger(__name__)
 
 KEY_TOKEN = 'ESA_PYTHON_TOKEN'
 KEY_TEAM = 'ESA_PYTHON_TEAM'
@@ -13,6 +13,7 @@ RCFILE = '.esapyrc'
 
 
 def _show_configuration():
+    logger.info('showing configurations')
     path_rc = _get_rcfilepath()
     print('configuration file, "%s": ' % str(path_rc))
     try:
@@ -24,11 +25,10 @@ def _show_configuration():
     except FileNotFoundError as e:
         print('  rcFile not found.')
 
-    if _load_token_from_environ() is not None:
-        print('environment variables:')
-        print('  %s=%s' % (KEY_TOKEN, os.environ.get(KEY_TOKEN, '')))
-        print('  %s=%s' % (KEY_TEAM, os.environ.get(KEY_TEAM, '')))
-        print('')
+    print('environment variables:')
+    print('  %s=%s' % (KEY_TOKEN, os.environ.get(KEY_TOKEN, '')))
+    print('  %s=%s' % (KEY_TEAM, os.environ.get(KEY_TEAM, '')))
+    print('')
 
 
 def get_token_and_team(args):
@@ -36,37 +36,39 @@ def get_token_and_team(args):
     """
     x = None
 
-    x = _load_token_from_args(args)
+    x = _get_token_from_args(args)
     if x is not None:
+        logger.info('The token and teamname are set from args.')
         return x
 
-    x = _load_token_from_environ()
+    x = _get_token_from_environ()
     if x is not None:
+        logger.info('The token and teamname are set from environ.')
         return x
 
-    x = _load_token_from_rcfile()
+    x = _get_token_from_rcfile()
     if x is not None:
+        logger.info('The token and teamname are set from rcfile.')
         return x
 
     raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.' % (RCFILE, KEY_TOKEN, KEY_TEAM))
 
 
-def _load_token_from_args(args):
-    try:
-        token, team = args.token, args.team
-    except AttributeError:
-        return None
+def _get_token_from_args(args):
+    token, team = args.token, args.team
 
     if token is not None and team is not None:
         return token, team
     else:
+        logger.debug('Getting token from args failed.')
         return None
 
 
-def _load_token_from_environ():
+def _get_token_from_environ():
     try:
         return os.environ[KEY_TOKEN], os.environ[KEY_TEAM]
     except KeyError:
+        logger.debug('Getting token from environ failed.')
         return None
 
 
@@ -79,7 +81,7 @@ def _load_rcfile():
     path_rc = _get_rcfilepath()
 
     try:
-        with path_rc.open('r') as f:
+        with path_rc.open('r', encoding='utf-8') as f:
             y = yaml.safe_load(f)
 
     except FileNotFoundError as e:
@@ -88,14 +90,14 @@ def _load_rcfile():
     return y
 
 
-def _load_token_from_rcfile():
+def _get_token_from_rcfile():
     x = None
 
     y = _load_rcfile()
     try:
         x = y['token'], y['team']
     except KeyError:
-        pass
+        logger.debug('Getting token from rcfile failed.')
 
     return x
 

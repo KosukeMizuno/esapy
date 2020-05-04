@@ -1,0 +1,107 @@
+@startuml
+title Upload Images in jupyter notebook
+
+start
+
+:Secure temp md file;
+
+partition process_cells {
+    while (End of cells ?)
+
+        if (which type ?) then (raw)
+            :check source_hidden;
+            :append on tempfile as codeblock;
+
+        elseif (?) then (markdown)
+            partition escape_for_esa {
+                :replace display math to math codeblock;
+                :replace _ to \_ in inline math;
+            }
+
+            partition extract_attachments {
+                if (has attachments ?) then (y)
+                    :extract attachment images;
+                    :replace img tag with extracted temp img file;
+                else (n)
+                endif
+            }
+
+            partition upload_images {
+                :count images;
+                while (end of images ?)
+                    :solve path;
+                    if (local image ?) then (y)
+                        :calc sha256;
+                        if (check hashlist) then (not yet uploaded)
+                            :upload image;
+                            :record hashlist;
+                        else (already uploaded)
+                            :get URL;
+                        endif
+                        :replace img tag with url;
+                    endif
+                endwhile
+            }
+
+            :check source_hidden;
+            :append on tempfile;
+
+        else (code)
+            partition source {
+                :check source_hidden;
+                :append source code block on tempfile;
+            }
+
+            partition outputs {
+                while (end of outputs ?)
+                    if (which type ?) then (stream)
+                        :remove escape sequences;
+                        :append text;
+                    elseif (?) then (execute_result)
+                        if (has text/html ?) then (y)
+                            :append html;
+                        elseif (has text/latex ?) then (y)
+                            :replace env(equation*) to align;
+                            :enclose env(begin~to) with math code block;
+                            :append as md;
+                        else (text/plain or other)
+                            :append text as codeblock;
+                        endif
+
+                    elseif (?) then (display_data)
+                        if (has image ?) then (y)
+                            :extract image;
+                            :calc sha256;
+                            if (check hashlist) then (not yet uploaded)
+                                :upload image;
+                                :record hashlist;
+                            else (already uploaded)
+                                :get URL;
+                            endif
+                            :append img tag with url;
+                        else (n)
+                            :append text;
+                        endif
+                    else (error)
+                        :remove escape sequences;
+                        :append traceback;
+                    endif
+
+                endwhile
+
+                :check outputs_hidden;
+                :check output scrolling;
+                :append on tempfile;
+            }
+
+
+        endif
+
+    endwhile
+}
+
+:append hash_list in metadata;
+
+stop
+
+@enduml

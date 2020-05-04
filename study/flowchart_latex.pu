@@ -1,0 +1,11 @@
+@startuml
+title Upload Images in latex file
+
+start
+
+:call pandoc;
+:upload images as markdown;
+
+stop
+
+@enduml

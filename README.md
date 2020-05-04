@@ -52,11 +52,11 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
     $ esa up target.ipynb
     ```
 
-    This package will call nbconvert and upload images, and upload markdown file as new post.
+    This package uploads images, and uploads markdown file as a new post or update the previously uploaded post.
 
 1. access the new post and edit.
 
-1. if process fails due to a network problem, you can re-try with `esa up target.md` .  When the input is a markdown, `nbconvert` step will be skipped.
+1. if process fails due to a network problem, you can check by `esa stats`.  When the input is a markdown, `nbconvert` step will be skipped.
 
 
 ## DOCUMENT
@@ -66,7 +66,6 @@ This package registers following command line tools.
 - `esa up <input_filepath>`
   - upload your file
   - supported format: ipynb, tex, and md
-  - This command calls `esa convert` , `esa replace` , and `esa publish` internally
 
 - `esa config`
   - list environs and config
@@ -75,20 +74,6 @@ This package registers following command line tools.
   - show statistics of your team
   - This command can be used for access test.
 
-- `esa convert <input_filepath>`
-  - subcommand
-  - call nbconvert or pandoc depending input format
-
-- `esa replace <input_filepath markdown file>`
-  - subcommand
-  - scan lines of markdown finding image tags (`![xxx](yyy)`).
-  - when the file path is not url, image file will be uploaded to your team of esa.io.
-  - If token/team are given as arguments and config file simultaneously, arguments are used.
-
-- `esa publish <input_filepath markdown file>`
-  - subcommand
-  - create new post
-
 
 ### config file
 The config file (`~/.esapyrc`) should be written in yaml format.
@@ -96,19 +81,15 @@ An example is shown below.
 ```yaml: ~/.esapyrc
 token: your_token
 team: your_team
-
-action:
-  goto_clipboard: true
 ```
 
-If `action.goto_clipboard` is true, a markdown body with modified urls will be copied to clipboard.  Default is false.
 
 ## INSTALLATION for DEVELOPMENT
 
 1. setup poetry on your environment
 1. clone this repository
 1. cd repo directory
-1. `poetry install`
+1. `$poetry install`
 1. `git checkout develop`
 
 ## LICENSE
