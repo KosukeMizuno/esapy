@@ -566,8 +566,12 @@ class IpynbProcessor(EsapyProcessorBase):
         md.extend(['```\n', '\n'])
 
         # folding
-        if cell_raw.get('metadata', {}).get('jupyter', {}).get('source_hidden', False):
-            md = ['\n', '<details>\n', '<summary>hidden raw cell</summary>\n', '\n',
+        is_source_hidden = cell_raw.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
+        is_source_hidden = is_source_hidden and (self.args['folding_mode'] != 'ignore')
+        if is_source_hidden:
+            md = ['\n',
+                  '<details>\n',
+                  '<summary>hidden raw cell</summary>\n', '\n',
                   *md,
                   '\n', '</details>\n', '\n']
 
@@ -632,8 +636,13 @@ class IpynbProcessor(EsapyProcessorBase):
             md[i] = _l
 
         # folding
-        if cell_md.get('metadata', {}).get('jupyter', {}).get('source_hidden', False):
-            md = ['\n', '<details>\n', '<summary>hidden markdown cell</summary>\n', '\n',
+        is_source_hidden = cell_md.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
+        is_source_hidden = is_source_hidden and (self.args['folding_mode'] != 'ignore')
+        if is_source_hidden:
+            md = ['\n',
+                  '<details>\n',
+                  '<summary>hidden markdown cell</summary>\n',
+                  '\n',
                   *md,
                   '\n', '</details>\n', '\n']
         return md
@@ -646,11 +655,17 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # source folding
         is_source_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
+        is_matplotlib_cell = len(cell_code['source']) > 0 and re.match(r'^plt\.figure', cell_code['source'][0]) is not None
+        is_open = (self.args['folding_mode'] == 'ignore') or not ((self.args['folding_mode'] == 'auto' and is_matplotlib_cell) or is_source_hidden)
+
         execution_count = cell_code.get('execution_count', 0)
         execution_count = execution_count if execution_count is not None else 0
+
+        summary = 'code source (matplotlib)' if is_matplotlib_cell else 'code source'
+
         md_source = ['\n',
-                     '<details>\n' if is_source_hidden else '<details open>\n',
-                     '<summary>[{:d}]: code source</summary>\n'.format(execution_count),
+                     '<details open>\n' if is_open else '<details>\n',
+                     '<summary>[{:d}]: {:s}</summary>\n'.format(execution_count, summary),
                      '\n', *md_source, '\n', '</details>\n', '\n']
 
         # outputs
@@ -666,8 +681,9 @@ class IpynbProcessor(EsapyProcessorBase):
         # output folding
         if len(cell_code['outputs']) > 0:
             is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
+            is_open = (self.args['folding_mode'] == 'ignore') or (not is_outputs_hidden)
             md_output = ['\n',
-                         '<details>\n' if is_outputs_hidden else '<details open>\n',
+                         '<details open>\n' if is_open else '<details>\n',
                          '<summary>[{:d}]: outputs</summary>\n'.format(execution_count),
                          '\n', *md_output, '\n', '</details>\n', '\n']
 

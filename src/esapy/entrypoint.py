@@ -104,6 +104,7 @@ g_up_output.add_argument('--no-output', action='store_true', help='work on tempo
 parser_up.add_argument('--leave-temp', action='store_true', help='leave temporary files')
 
 g_up_mode = parser_up.add_argument_group('optional arguments for mode config')
+g_up_mode.add_argument('--folding-mode', type=str, choices=['auto', 'as-shown', 'ignore'], default='auto', help='default is auto. ignore: any details tag will be set as open, as-shown: details tags obey metadata of each cell, auto: source block of code-cell starting from "plt.figure" will be closed.')
 g_up_mode.add_argument('--publish-mode', type=str, choices=['force', 'check', 'skip'], default='force', help='default is force. force: publish body even if uploading images failed, check: publish body when uploading succeeded, skip: create no post')
 g_up_mode.add_argument('--post-mode', type=str, choices=['auto', 'new'], default='auto', help='default is auto. auto: when the file has been already uploaded, update the post (this function only for ipynb input), new: create new post always')
 g_up_browse = g_up_mode.add_mutually_exclusive_group()
