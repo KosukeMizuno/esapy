@@ -81,7 +81,7 @@ def _load_rcfile():
     path_rc = _get_rcfilepath()
 
     try:
-        with path_rc.open('r') as f:
+        with path_rc.open('r', encoding='utf-8') as f:
             y = yaml.safe_load(f)
 
     except FileNotFoundError as e:
