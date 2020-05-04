@@ -105,12 +105,7 @@ class EsapyProcessorBase(object):
             pass
 
     def is_uploaded(self):
-        '''アップロード履歴があるかどうか確認する
-
-        あるなら、post_number を返す
-        なければ None を返す
-        '''
-        pass
+        return False
 
     def gather_post_info(self):
         '''gathering informatin for create/update post
@@ -286,6 +281,8 @@ class MarkdownProcessor(EsapyProcessorBase):
                                        proxy=self.args['proxy'])
 
         self.post_info = res.json()
+        self.nbjson
+
         self.result_upload = True
 
         return post_url
@@ -564,7 +561,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _process_cell_raw(self, cell_raw):
         md = ['\n', '```\n']
-        md.extend(cell_raw['source'])
+        md.extend(list(cell_raw['source']))
         md[-1] = md[-1] + '\n'
         md.extend(['```\n', '\n'])
 
@@ -578,7 +575,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _process_cell_md(self, cell_md):
         md = ['\n']
-        md.extend(cell_md['source'])
+        md.extend(list(cell_md['source']))
         md[-1] = md[-1] + '\n'
         md.extend(['\n'])
 
@@ -606,7 +603,6 @@ class IpynbProcessor(EsapyProcessorBase):
             _l = l
             matches = list(re.finditer(r'!\[(.*?)\]\(attachment:(.+\.png)\)', l))
             for m in matches[::-1]:
-                print(_l, m)
                 path_img = at_images.get(m.group(2), m.group(2))
                 _l = _l[:m.start()] \
                     + '![%s](%s)' % (m.group(1), str(path_img)) \
@@ -644,7 +640,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _process_cell_code(self, cell_code):
         md_source = ['\n', '```{:s}\n'.format(self.language)]
-        md_source.extend(cell_code['source'])
+        md_source.extend(list(cell_code['source']))
         md_source[-1] = md_source[-1] + '\n'
         md_source.extend(['```\n', '\n'])
 
@@ -690,22 +686,23 @@ class IpynbProcessor(EsapyProcessorBase):
         return md
 
     def _process_output_stream(self, output_stream):
-        txt = [self._remove_ansi(l) for l in output_stream['text']]
+        txt = [self._remove_ansi(l) for l in list(output_stream['text'])]
         return ['\n', '```\n'] + txt + ['```\n', '\n']
 
     def _process_output_result(self, output_result):
         if 'text/html' in output_result['data']:
-            md = ['\n'] + output_result['data']['text/html'] + ['\n']
+            md = ['\n'] + list(output_result['data']['text/html']) + ['\n']
 
         elif 'text/latex' in output_result['data']:
-            md = output_result['data']['text/latex']
-            for i in range(len(md)):
-                md[i] = re.sub(r'\\\\', r'\\cr', md[i])
-                md[i] = re.sub(r'\\begin{equation\*}', r'\n```math\n\\begin{equation*}', md[i])
-                md[i] = re.sub(r'\\end{equation\*}', r'\\end{equation*}\n```\n', md[i])
+            md = []
+            for i, line in enumerate(output_result['data']['text/latex']):
+                line = re.sub(r'\\\\', r'\\cr', line)
+                line = re.sub(r'\\begin{equation\*}', r'\n```math\n\\begin{equation*}', line)
+                line = re.sub(r'\\end{equation\*}', r'\\end{equation*}\n```\n', line)
+                md.append(line)
 
         else:  # text/plain
-            md = ['\n', '```\n'] + output_result['data']['text/plain'] + ['```\n', '\n']
+            md = ['\n', '```\n'] + list(output_result['data']['text/plain']) + ['```\n', '\n']
 
         return md
 
@@ -727,7 +724,7 @@ class IpynbProcessor(EsapyProcessorBase):
         return md
 
     def _process_output_error(self, output_error):
-        txt = [self._remove_ansi(l) + '\n' for l in output_error['traceback']]
+        txt = [self._remove_ansi(l) + '\n' for l in list(output_error['traceback'])]
         return ['\n', '```\n'] + txt + ['```\n', '\n']
 
     def _upload_image_and_get_url(self, path_img):
@@ -774,7 +771,52 @@ class IpynbProcessor(EsapyProcessorBase):
         return m.hexdigest()
 
     def upload_body(self):
-        pass
+        # load temp ipynb
+        with self.path_ipynb.open('r', encoding='utf-8') as f:
+            self.nbjson = json.load(f)
+
+        # load temp md
+        with self.path_md.open('r', encoding='utf-8') as f:
+            md_body = f.readlines()
+            md_body = ''.join(md_body)
+
+        logger.info('Gathering information for create post')
+        info_dict = self.gather_post_info()
+        logger.debug(info_dict)
+
+        post_number = self.get_post_number()
+        if post_number is None:
+            logger.info('This file has not been uploaded before. ==> create new post')
+            post_url, res = create_post(md_body,
+                                        name=info_dict['name'],
+                                        tags=info_dict['tags'],
+                                        category=info_dict['category'],
+                                        wip=info_dict['wip'],
+                                        message=info_dict['message'],
+                                        token=self.args['token'],
+                                        team=self.args['team'],
+                                        proxy=self.args['proxy'])
+        else:
+            logger.info('This file has been already uploaded. ==> patch the post')
+            post_url, res = patch_post(post_number, md_body,
+                                       name=info_dict['name'],
+                                       tags=info_dict['tags'],
+                                       category=info_dict['category'],
+                                       wip=info_dict['wip'],
+                                       message=info_dict['message'],
+                                       token=self.args['token'],
+                                       team=self.args['team'],
+                                       proxy=self.args['proxy'])
+
+        self.post_info = res.json()
+        self.nbjson['metadata']['esapy']['post_info'] = self.post_info
+        self.result_upload = self.is_uploaded()
+
+        with self.path_ipynb.open('w', encoding='utf-8') as f:
+            json.dump(self.nbjson, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+            logger.info('Intermediate ipynb file has been saved.')
+
+        return post_url
 
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
@@ -798,13 +840,32 @@ class IpynbProcessor(EsapyProcessorBase):
         else:
             logger.info('no-output mode')
 
-    def is_uploaded(self):
-        '''アップロード履歴があるかどうか確認する
+    def get_post_number(self):
+        try:
+            return self.nbjson['metadata']['esapy']['post_info']['number']
+        except KeyError:
+            return None
 
-        あるなら、post_number を返す
-        なければ None を返す
+    def is_uploaded(self):
+        return self.get_post_number() is not None
+
+    def _get_post_info(self):
+        '''get post information for save derived from HTTP_RESPONSE
         '''
-        return self.nbjson['metadata']['esapy']['post_info']['number']
+        if self.post_info is None:
+            return ''
+
+        yf = ['---',
+              'title: "{:s}"'.format(self.post_info['name']),
+              'category: {:s}'.format(self.post_info['category']),
+              'tags: {:s}'.format(', '.join(self.post_info['tags'])),
+              'created_at: {:s}'.format(self.post_info['created_at']),
+              'updated_at: {:s}'.format(self.post_info['updated_at']),
+              'published: {:s}'.format(str(not self.post_info['wip']).lower()),
+              'number: {:s}'.format(str(self.post_info['number'])),
+              '---\n']
+        yf = '\n'.join(yf)
+        return yf
 
     def gather_post_info(self):
         '''gathering informatin for create/update post
@@ -813,8 +874,11 @@ class IpynbProcessor(EsapyProcessorBase):
         d = {}
 
         # manage tags (None or list)
-        if info_prev.get('tags', '') is not None:
-            d['tags'] = info_prev.get('tags', '').split(', ')
+        tags = info_prev.get('tags', '')
+        if isinstance(tags, list):
+            d['tags'] = tags
+        elif tags is not None:
+            d['tags'] = tags.split(', ')
         else:
             d['tags'] = []
 
@@ -845,9 +909,6 @@ if __name__ == '__main__':
 
     with path_input.open('r', encoding='utf-8') as f:
         ipynb_json = json.load(f)
-
-    print(ipynb_json['cells'][7])
-    print(ipynb_json['metadata'])
 
     # attachement 抽出のテスト
     cell = ipynb_json['cells'][7]
