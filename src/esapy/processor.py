@@ -498,7 +498,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.metadata = None
+        self.nbjson = None
 
     def __enter__(self):
         super().__enter__()
@@ -511,13 +511,45 @@ class IpynbProcessor(EsapyProcessorBase):
         return self
 
     def preprocess(self):
-        pass
+        # load ipynb
+        with self.path_input.open('r', encoding='utf-8') as f:
+            self.nbjson = json.load(f)
+        logger.info('Jupyter Notebook ({:s}) was loaded.'.format(str(self.path_input)))
 
-    def upload_body(self):
-        pass
+        # check nbformat version
+        logger.debug('  nbformat={:d}.{:d}'.format(self.nbjson['nbformat'], self.nbjson['nbformat_minor']))
+        if self.nbjson['nbformat'] != 4:
+            logger.warn('This program supports nbformat=4.x')
 
-    def save(self):
-        pass
+        # info of notebook
+        self.language = self.nbjson['metadata']['language_info']['language']
+
+        # initialize metadata if required.
+        if 'esapy' not in self.nbjson['metadata']:
+            self.nbjson['metadata']['esapy'] = {}
+            logger.debug('Notebook metadata initialized.')
+        if 'post_info' not in self.nbjson['metadata']['esapy']:
+            self.nbjson['metadata']['esapy']['post_info'] = {}
+            logger.debug('Notebook previous post_info initialized.')
+        if 'number' not in self.nbjson['metadata']['esapy']['post_info']:
+            self.nbjson['metadata']['esapy']['post_info']['number'] = None
+            logger.info('This notebook has not been uploaded at esa.io.')
+        if 'hashdict' not in self.nbjson['metadata']['esapy']:
+            self.nbjson['metadata']['esapy']['hashdict'] = {}  # key=sha256, value=url
+            logger.debug('Notebook hash_dict initialized.')
+
+        # Process each cell
+        logger.info('Processing {:d} cells...'.format(len(self.nbjson['cells'])))
+        md_body = []
+        for cell in self.nbjson['cells']:
+            pass
+
+        # save temprorary files
+        self.path_md.open('w', encoding='utf-8').writelines(md_body)
+        logger.info('Intermediate md file has been saved.')
+        with self.path_ipynb.open('w', encoding='utf-8') as f:
+            json.dump(self.nbjson, f)
+            logger.info('Intermediate ipynb file has been saved.')
 
     def _process_cell_raw(self, cell_raw):
         pass
@@ -544,8 +576,20 @@ class IpynbProcessor(EsapyProcessorBase):
         '''filepathからsha256を計算、ハッシュリストを参照してアップロード済みか確認する
         未アップならアップロードしてURLを返す
         アップ済みならURLを返す
+
+        エラー処理は読み出しもとで行う
         '''
-        pass
+        d = self.nbjson['metadata']['esapy']['hashdict']
+        h = self._get_sha256(path_img)
+
+        if h not in d:  # unuploaded image
+            url, _ = upload_binary(path_img,
+                                   token=self.args['token'],
+                                   team=self.args['team'],
+                                   proxy=self.args['proxy'])
+            d['h'] = url  # record url and sha256
+
+        return d['h']
 
     def _save_encodedimage(self, s_b64):
         '''base64-encoded-multiline-png-data を一時ファイルに保存して、ファイルパスを返す
@@ -570,6 +614,51 @@ class IpynbProcessor(EsapyProcessorBase):
         with Path(path_file).open('rb') as f:
             m.update(f.read())
         return m.hexdigest()
+
+    def upload_body(self):
+        pass
+
+    def save(self):
+        pass
+
+    def is_uploaded(self):
+        '''アップロード履歴があるかどうか確認する
+
+        あるなら、post_number を返す
+        なければ None を返す
+        '''
+        return self.nbjson['metadata']['esapy']['post_info']['number']
+
+    def gather_post_info(self):
+        '''gathering informatin for create/update post
+        '''
+        info_prev = self.nbjson['metadata']['esapy']['post_info']
+        d = {}
+
+        # manage tags (None or list)
+        if info_prev.get('tags', '') is not None:
+            d['tags'] = info_prev.get('tags', '').split(', ')
+        else:
+            d['tags'] = []
+
+        if self.args['tags'] is not None:
+            d['tags'].extend(self.args['tags'])
+        d['tags'] = list(set(d['tags']))  # unique
+
+        # wip (bool)
+        d['wip'] = not (not self.args['wip'] or not info_prev.get('wip', True))
+
+        # category, message, name (None or str)
+        for k in ['category', 'message', 'name']:
+            if self.args[k] is not None:
+                d[k] = self.args[k]
+            else:
+                d[k] = info_prev.get(k, None)
+
+        return d
+
+    def remove_ansi(self, s):
+        return re.sub(r'\x1b[^m]*m', '', s)
 
 
 if __name__ == '__main__':
