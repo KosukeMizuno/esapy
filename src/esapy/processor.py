@@ -166,7 +166,8 @@ class MarkdownProcessor(EsapyProcessorBase):
                 logger.debug('YAML frontmatter is not detected in input file.')
 
             # save original markdown without YAML
-            self.path_orig_body.open('w', encoding='utf-8').writelines(md_body[ind_start_body + 1:])
+            with self.path_orig_body.open('w', encoding='utf-8') as f:
+                f.writelines(md_body[ind_start_body + 1:])
             logger.info('Original markdown body excluded YAML frontmatter has been saved.')
 
             # process each line
@@ -184,7 +185,8 @@ class MarkdownProcessor(EsapyProcessorBase):
         self.result_preprocess = (count_images == count_success)  # Are all uploadings succeeded ?
 
         # save intermediate markdown
-        self.path_md.open('w', encoding='utf-8').writelines(md_body_modified)
+        with self.path_md.open('w', encoding='utf-8') as f:
+            f.writelines(md_body_modified)
         logger.info('Intermediate markdown file has been saved.')
 
         return self.result_preprocess
@@ -302,13 +304,15 @@ class MarkdownProcessor(EsapyProcessorBase):
             # output が指定されている
             p = Path(self.args['output'])
             logger.info('output file path={:s}'.format(str(p)))
-            p.open('w', encoding='utf-8').writelines(md_body)
+            with p.open('w', encoding='utf-8') as f:
+                f.writelines(md_body)
 
         elif self.args['destructive']:
             if self.result_upload:
                 p = self.path_input
                 logger.info('output file path is input file path={:s}'.format(str(p)))
-                p.open('w', encoding='utf-8').writelines(md_body)
+                with p.open('w', encoding='utf-8') as f:
+                    f.writelines(md_body)
             else:
                 logger.info('uploading body was failed, so saving is skipped.')
 
@@ -431,7 +435,8 @@ class TexProcessor(MarkdownProcessor):
             # output が指定されている
             p = Path(self.args['output'])
             logger.info('output file path={:s}'.format(str(p)))
-            p.open('w', encoding='utf-8').writelines(md_body)
+            with p.open('w', encoding='utf-8') as f:
+                f.writelines(md_body)
 
         elif self.args['destructive']:
             logger.info('Nothing was done at #save in destructive mode of TexProcessor.')
@@ -485,7 +490,8 @@ class IpynbProcessor_via_nbconvert(MarkdownProcessor):
             # output が指定されている
             p = Path(self.args['output'])
             logger.info('output file path={:s}'.format(str(p)))
-            p.open('w', encoding='utf-8').writelines(md_body)
+            with p.open('w', encoding='utf-8') as f:
+                f.writelines(md_body)
 
         elif self.args['destructive']:
             logger.info('Nothing was done at #save in destructive mode of IpynbProcessor_via_nbconvert.')
@@ -550,7 +556,8 @@ class IpynbProcessor(EsapyProcessorBase):
             md_body.extend(proc_func(cell))
 
         # save temprorary files
-        self.path_md.open('w', encoding='utf-8').writelines(md_body)
+        with self.path_md.open('w', encoding='utf-8') as f:
+            f.writelines(md_body)
         logger.info('Intermediate md file has been saved.')
         with self.path_ipynb.open('w', encoding='utf-8') as f:
             json.dump(self.nbjson, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
