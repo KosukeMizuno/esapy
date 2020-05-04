@@ -590,13 +590,13 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # マークダウン中の $$~$$ を ```math~``` にする
         count_ddoller = 0
-        for i, l in enumerate(md):
-            if l != '$$\n':
+        for i in range(len(md)):
+            if md[i] != '$$\n':
                 continue
 
             count_ddoller += 1
 
-            if count_ddoller // 2 == 1:
+            if count_ddoller % 2 == 1:
                 md[i] = '```math\n'
             else:
                 md[i] = '```\n'
@@ -663,12 +663,20 @@ class IpynbProcessor(EsapyProcessorBase):
             md_output.extend(func(b))
 
         # output folding
-        is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
-        md_output = ['\n',
-                     '<details>\n' if is_outputs_hidden else '<details open>\n',
-                     '<summary>[{:d}]: outputs</summary>\n'.format(execution_count),
-                     '\n', *md_output, '\n', '</details>\n', '\n']
+        if len(cell_code['outputs']) > 0:
+            is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
+            md_output = ['\n',
+                         '<details>\n' if is_outputs_hidden else '<details open>\n',
+                         '<summary>[{:d}]: outputs</summary>\n'.format(execution_count),
+                         '\n', *md_output, '\n', '</details>\n', '\n']
 
+        # length check
+        if len(cell_code['source']) == 0:
+            md_source = []
+        if len(cell_code['outputs']) == 0:
+            md_output = []
+
+        # merge
         md = md_source + md_output
 
         # output scrolling
