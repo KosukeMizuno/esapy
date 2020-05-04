@@ -5,7 +5,7 @@ import argparse
 import webbrowser
 import sys
 
-from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor_via_nbconvert
+from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
 
@@ -20,7 +20,7 @@ def command_up(args):
 
     # check file-type
     suffix = Path(args.target).suffix
-    proc_dict = {'.ipynb': IpynbProcessor_via_nbconvert,
+    proc_dict = {'.ipynb': IpynbProcessor,
                  '.md': MarkdownProcessor,
                  '.tex': TexProcessor}
     if suffix not in proc_dict.keys():
@@ -101,6 +101,7 @@ g_up_output = parser_up.add_argument_group(title='optional arguments for assigni
 g_up_output.add_argument('--destructive', action='store_true', default=True, help='[default] overwrite input file')
 g_up_output.add_argument('--output', metavar='<output_filepath>', help='output filename')
 g_up_output.add_argument('--no-output', action='store_true', help='work on temporary file')
+parser_up.add_argument('--leave-temp', action='store_true', help='leave temporary files')
 
 g_up_mode = parser_up.add_argument_group('optional arguments for mode config')
 g_up_mode.add_argument('--publish-mode', type=str, choices=['force', 'check', 'skip'], default='force', help='default is force. force: publish body even if uploading images failed, check: publish body when uploading succeeded, skip: create no post')

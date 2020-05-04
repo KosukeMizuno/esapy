@@ -9,6 +9,7 @@ import yaml
 import subprocess
 import base64
 import hashlib
+import json
 
 from .api import upload_binary, create_post, patch_post
 from .loadrc import get_token_and_team
@@ -51,7 +52,7 @@ class EsapyProcessorBase(object):
         logger.info('Securing temporal directory and files')
 
         # temporal working directory
-        self.path_pwd = tempfile.mkdtemp(prefix=self.path_input.name, dir=self.path_input.parent)
+        self.path_pwd = tempfile.mkdtemp(prefix=self.path_input.name, dir=self.path_root)
         self.path_pwd = Path(self.path_pwd)
         logger.info('  temporal working directory={:s}'.format(str(self.path_pwd)))
 
@@ -63,8 +64,11 @@ class EsapyProcessorBase(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        logger.info('Removing temporal working directory')
-        shutil.rmtree(self.path_pwd)
+        if not self.args['leave_temp']:
+            logger.info('Removing temporal working directory')
+            shutil.rmtree(self.path_pwd)
+        else:
+            logger.info('Leave temporary files.')
 
     def preprocess(self):
         '''与えられたファイルを前処理する
@@ -522,7 +526,8 @@ class IpynbProcessor(EsapyProcessorBase):
             logger.warn('This program supports nbformat=4.x')
 
         # info of notebook
-        self.language = self.nbjson['metadata']['language_info']['language']
+        print(self.nbjson['metadata']['kernelspec'])
+        self.language = self.nbjson['metadata']['kernelspec']['language']
 
         # initialize metadata if required.
         if 'esapy' not in self.nbjson['metadata']:
@@ -553,6 +558,9 @@ class IpynbProcessor(EsapyProcessorBase):
         with self.path_ipynb.open('w', encoding='utf-8') as f:
             json.dump(self.nbjson, f)
             logger.info('Intermediate ipynb file has been saved.')
+
+        self.result_preprocess = True  # TODO
+        return self.result_preprocess
 
     def _process_cell_raw(self, cell_raw):
         md = ['\n', '```\n']
@@ -588,7 +596,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
             count_ddoller += 1
 
-            if count_ddoller // 2 = 1:
+            if count_ddoller // 2 == 1:
                 md[i] = '```math\n'
             else:
                 md[i] = '```\n'
@@ -638,10 +646,11 @@ class IpynbProcessor(EsapyProcessorBase):
         # source folding
         is_source_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
         execution_count = cell_code.get('execution_count', 0)
+        execution_count = execution_count if execution_count is not None else 0
         md_source = ['\n',
                      '<details>\n' if is_source_hidden else '<details open>\n',
                      '<summary>[{:d}]: code source</summary>\n'.format(execution_count),
-                     '\n', *md, '\n', '</details>\n', '\n']
+                     '\n', *md_source, '\n', '</details>\n', '\n']
 
         # outputs
         func_dict = dict(stream=self._process_output_stream,
@@ -655,7 +664,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # output folding
         is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
-        md_source = ['\n',
+        md_output = ['\n',
                      '<details>\n' if is_outputs_hidden else '<details open>\n',
                      '<summary>[{:d}]: outputs</summary>\n'.format(execution_count),
                      '\n', *md_output, '\n', '</details>\n', '\n']
@@ -683,21 +692,15 @@ class IpynbProcessor(EsapyProcessorBase):
                 md[i] = re.sub(r'\\end{equation\*}', r'\\end{equation*}\n```\n', md[i])
 
         else:  # text/plain
-            md = ['\n', '```\n'] + output_result['data'] + ['```\n', '\n']
+            md = ['\n', '```\n'] + output_result['data']['text/plain'] + ['```\n', '\n']
 
-        # output count
-        execution_count = output_stream.get('execution_count', 0)
-        md_source = ['\n',
-                     '<details>\n' if is_source_hidden else '<details open>\n',
-                     '<summary>[{:d}]: code source</summary>\n'.format(execution_count),
-                     '\n', *md, '\n', '</details>\n', '\n']
-        return md_source
+        return md
 
     def _process_output_disp(self, output_disp):
         md = []
 
         if 'image/png' in output_disp['data']:
-            alttxt = output_disp['data'].get('text/plain', '')
+            alttxt = ''.join(output_disp['data'].get('text/plain', ['']))
             path_img = self._save_encodedimage(output_disp['data']['image/png'])
             try:
                 url = self._upload_image_and_get_url(path_img)
@@ -737,7 +740,7 @@ class IpynbProcessor(EsapyProcessorBase):
         '''base64-encoded-multiline-png-data を一時ファイルに保存して、ファイルパスを返す
         '''
         p = self._mkstemp(suffix='.png')
-        with open(fn_testpng, 'wb') as f:
+        with p.open('wb') as f:
             dat = base64.b64decode(s_b64)
             f.write(dat)
         return p
@@ -763,31 +766,24 @@ class IpynbProcessor(EsapyProcessorBase):
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
         '''
-        with self.path_orig_body.open('r', encoding='utf-8') as f:
-            md_body = f.readlines()
-            md_body = ''.join(md_body)
-        yf = self._get_yaml_frontmatter()
-        logger.debug('YAML frontmatter:')
-        logger.debug('{:s}'.format(yf))
-        md_body = yf + md_body
+        with self.path_ipynb.open('r', encoding='utf-8') as f:
+            ipynb_json = json.load(f)
 
         if self.args['output'] is not None:
             # output が指定されている
             p = Path(self.args['output'])
             logger.info('output file path={:s}'.format(str(p)))
-            p.open('w', encoding='utf-8').writelines(md_body)
+            with p.open('w', encoding='utf-8') as f:
+                json.dump(ipynb_json, f)
 
         elif self.args['destructive']:
-            if self.result_upload:
-                p = self.path_input
-                logger.info('output file path is input file path={:s}'.format(str(p)))
-                p.open('w', encoding='utf-8').writelines(md_body)
-            else:
-                logger.info('uploading body was failed, so saving is skipped.')
+            p = self.path_input
+            logger.info('output file path={:s}'.format(str(p)))
+            with p.open('w', encoding='utf-8') as f:
+                json.dump(ipynb_json, f)
 
         else:
             logger.info('no-output mode')
-
 
     def is_uploaded(self):
         '''アップロード履歴があるかどうか確認する
