@@ -556,7 +556,7 @@ class IpynbProcessor(EsapyProcessorBase):
         self.path_md.open('w', encoding='utf-8').writelines(md_body)
         logger.info('Intermediate md file has been saved.')
         with self.path_ipynb.open('w', encoding='utf-8') as f:
-            json.dump(self.nbjson, f)
+            json.dump(self.nbjson, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
             logger.info('Intermediate ipynb file has been saved.')
 
         self.result_preprocess = True  # TODO
@@ -582,12 +582,6 @@ class IpynbProcessor(EsapyProcessorBase):
         md[-1] = md[-1] + '\n'
         md.extend(['\n'])
 
-        # attachment があったら抽出
-        at_images = {}  # key=attachment:(xxx.png), value=file name (str)
-        for at_name, v in cell_md.get('attachments', {}).items():
-            path_at = self._save_encodedimage(v['image/png'])
-            at_images[at_name] = str(path_at)
-
         # マークダウン中の $$~$$ を ```math~``` にする
         count_ddoller = 0
         for i in range(len(md)):
@@ -601,26 +595,37 @@ class IpynbProcessor(EsapyProcessorBase):
             else:
                 md[i] = '```\n'
 
+        # attachment があったら抽出
+        at_images = {}  # key=attachment:(xxx.png), value=file path
+        for at_name, v in cell_md.get('attachments', {}).items():
+            path_at = self._save_encodedimage(v['image/png'])
+            at_images[at_name] = path_at
+
         # attachment image を参照するimgタグがあったら抽出後のファイルパスで置き換え
         for i, l in enumerate(md):
             _l = l
-            matches = list(re.finditer(r'![(.*?)]\(attachment:(.+\.png)\)', l))
+            matches = list(re.finditer(r'!\[(.*?)\]\(attachment:(.+\.png)\)', l))
             for m in matches[::-1]:
+                print(_l, m)
                 path_img = at_images.get(m.group(2), m.group(2))
                 _l = _l[:m.start()] \
-                    + '![%s](%s)' % (m.group(1), path_img) \
+                    + '![%s](%s)' % (m.group(1), str(path_img)) \
                     + _l[m.end():]
             md[i] = _l
 
         # imgタグがあったらsha256からurlをゲットして、置き換え
         for i, l in enumerate(md):
             _l = l
-            matches = list(re.finditer(r'![(.*?)]\((.+\.png)\)', l))
+            matches = list(re.finditer(r'!\[(.*?)\]\((.+\.png)\)', l))
             for m in matches[::-1]:
+                fn = m.group(2)
+                if len(fn) >= 4 and fn[:4] == 'http':
+                    continue
+
                 alttxt = m.group(1)
-                path_img = Path(m.group(2))
+                path_img = Path(fn)
                 try:
-                    url = self._upload_image_and_get_url()
+                    url = self._upload_image_and_get_url(path_img)
                 except RuntimeError:
                     url = str(path_img)
                     alttxt = alttxt + ' (upload failed)'
@@ -740,9 +745,9 @@ class IpynbProcessor(EsapyProcessorBase):
                                    token=self.args['token'],
                                    team=self.args['team'],
                                    proxy=self.args['proxy'])
-            d['h'] = url  # record url and sha256
+            d[h] = url  # record url and sha256
 
-        return d['h']
+        return d[h]
 
     def _save_encodedimage(self, s_b64):
         '''base64-encoded-multiline-png-data を一時ファイルに保存して、ファイルパスを返す
@@ -782,13 +787,13 @@ class IpynbProcessor(EsapyProcessorBase):
             p = Path(self.args['output'])
             logger.info('output file path={:s}'.format(str(p)))
             with p.open('w', encoding='utf-8') as f:
-                json.dump(ipynb_json, f)
+                json.dump(ipynb_json, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
         elif self.args['destructive']:
             p = self.path_input
             logger.info('output file path={:s}'.format(str(p)))
             with p.open('w', encoding='utf-8') as f:
-                json.dump(ipynb_json, f)
+                json.dump(ipynb_json, f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
         else:
             logger.info('no-output mode')
