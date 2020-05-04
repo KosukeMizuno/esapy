@@ -123,21 +123,20 @@ cell_type は次の3通り (raw, markdown, code) が存在する
 
         となる。JupyterNotebook上では`text/latex`、ipython上では`text/plain`を表示する。
 
-        - QObjで表示されるlatexは`equation*`環境だが、esa.ioは対応していない
         - pandas.DataFrameを表示させると`text/html`と`text/plain`が入っている
-
-      - 仕様上、このデータとして`image/png`も入りうるようだが、matplotlibの場合は次のdisplay_dataになる。もしかしたらPILとか使う場合にくるかもしれないが、未調査。
-
-    - display_data
-
-      - matplotlibで図を作るとこうなる
-
-        - `image/png`に図のデータ、`text/plain`にalt-textが入っている
+        
+- 仕様上、このデータとして`image/png`も入りうるようだが、matplotlibの場合は次のdisplay_dataになる。もしかしたらPILとか使う場合にくるかもしれないが、未調査。
+      
+- display_data
+    
+  - matplotlibで図を作るとこうなる
+    
+    - `image/png`に図のデータ、`text/plain`にalt-textが入っている
         - Figureを複数作成するとoutputsの中身が増える（ひとつのoutputブロックに図はひとつ）
-
-      - どういうときに`application/json`がくるかは不明
-
-      - ```json
+    
+  - どういうときに`application/json`がくるかは不明
+    
+  - ```json
         {
           "output_type" : "display_data",
           "data" : {
@@ -164,10 +163,10 @@ cell_type は次の3通り (raw, markdown, code) が存在する
           },
         }
         ```
-
-    - error
-
-      - ```json
+    
+- error
+    
+  - ```json
     {
             "cell_type": "code",
         "execution_count": 2,
