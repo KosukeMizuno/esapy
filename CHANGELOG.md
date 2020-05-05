@@ -8,9 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
-## [1.0.2] - 2020-05-05
+## [1.0.3] - 2020-05-05
 ### Fixed
 - WinError at removing temporary files
+- post-mode option bug is fixed.
 
 ## [1.0.0] - 2020-05-05
 ### Added

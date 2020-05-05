@@ -268,7 +268,7 @@ class MarkdownProcessor(EsapyProcessorBase):
         logger.debug(info_dict)
 
         post_number = self.get_post_number()
-        if post_number is None:
+        if post_number is None  or self.args['post_mode'] == 'new':
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = create_post(md_body,
                                         name=info_dict['name'],
@@ -831,7 +831,7 @@ class IpynbProcessor(EsapyProcessorBase):
             logger.warn('uploading ipynb file itself failed.')
 
         post_number = self.get_post_number()
-        if post_number is None:
+        if post_number is None or self.args['post_mode'] == 'new':
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = create_post(md_body,
                                         name=info_dict['name'],
