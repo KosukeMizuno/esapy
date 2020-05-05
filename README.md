@@ -16,15 +16,15 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 1. Install pandoc
 
     ```shell
-    $ sudo apt install pandoc
+    $sudo apt install pandoc
     ```
-    
+
     This package call nbconvert internally.
 
 1. Install package
 
     ```shell
-    $ pip install esapy
+    $pip install esapy
     ```
 
 1. generate esa.io token with read/write permission.
@@ -56,7 +56,7 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 
 1. access the new post and edit.
 
-1. if process fails due to a network problem, you can check by `esa stats`.  When the input is a markdown, `nbconvert` step will be skipped.
+1. if process fails due to a network problem, you can check by `esa stats`.
 
 
 ## DOCUMENT
@@ -74,6 +74,12 @@ This package registers following command line tools.
   - show statistics of your team
   - This command can be used for access test.
 
+- `esa reset <target.ipynb>`
+  - remove upload history by esapy in notebook file
+
+- `esa ls <dirname>`
+  - show notebook list in the directory
+  - `<dirname>` can be abbreveated. Default=`.`
 
 ### config file
 The config file (`~/.esapyrc`) should be written in yaml format.
@@ -89,7 +95,7 @@ team: your_team
 1. setup poetry on your environment
 1. clone this repository
 1. cd repo directory
-1. `$poetry install`
+1. `poetry install`
 1. `git checkout develop`
 
 ## LICENSE
