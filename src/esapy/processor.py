@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import re
+import os
 from urllib.parse import unquote
 import yaml
 import subprocess
@@ -51,19 +52,26 @@ class EsapyProcessorBase(object):
     def __enter__(self):
         logger.info('Securing temporal directory and files')
 
+        # os file descriptor
+        self._fd_list = []
+
         # temporal working directory
         self.path_pwd = tempfile.mkdtemp(prefix=self.path_input.name, dir=self.path_root)
         self.path_pwd = Path(self.path_pwd)
         logger.info('  temporal working directory={:s}'.format(str(self.path_pwd)))
 
         # intermediate markdown file ready to be uploaded
-        _, self.path_md = tempfile.mkstemp(suffix='.md', dir=self.path_pwd)
+        fd, self.path_md = tempfile.mkstemp(suffix='.md', dir=self.path_pwd)
+        self._fd_list.append(fd)
         self.path_md = Path(self.path_md)
         logger.info('  intermediate markdown file={:s}'.format(str(self.path_md)))
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        for fd in self._fd_list:
+            os.close(fd)
+
         if not self.args['leave_temp']:
             logger.info('Removing temporal working directory')
             shutil.rmtree(self.path_pwd)
@@ -132,7 +140,8 @@ class MarkdownProcessor(EsapyProcessorBase):
         super().__enter__()
 
         # original markdown file excluded yaml frontmatter
-        _, self.path_orig_body = tempfile.mkstemp(suffix='.md', dir=self.path_pwd)
+        fd, self.path_orig_body = tempfile.mkstemp(suffix='.md', dir=self.path_pwd)
+        self._fd_list.append(fd)
         self.path_orig_body = Path(self.path_orig_body)
         logger.info('  original markdown file excluded YAML frontmatter={:s}'.format(str(self.path_orig_body)))
 
@@ -511,7 +520,8 @@ class IpynbProcessor(EsapyProcessorBase):
         super().__enter__()
 
         # intermediate ipynb file
-        _, self.path_ipynb = tempfile.mkstemp(suffix='.ipynb', dir=self.path_pwd)
+        fd, self.path_ipynb = tempfile.mkstemp(suffix='.ipynb', dir=self.path_pwd)
+        self._fd_list.append(fd)
         self.path_ipynb = Path(self.path_ipynb)
         logger.info('  intermediate ipynb file={:s}'.format(str(self.path_ipynb)))
 
@@ -782,7 +792,8 @@ class IpynbProcessor(EsapyProcessorBase):
         '''一時ファイルを確保してファイルパスを返す
         '''
         args = dict(dict(dir=self.path_pwd), **kwargs)
-        _, fn_tmp = tempfile.mkstemp(**args)
+        fd, fn_tmp = tempfile.mkstemp(**args)
+        self._fd_list.append(fd)
         return Path(fn_tmp)
 
     def _get_sha256(self, path_file):
