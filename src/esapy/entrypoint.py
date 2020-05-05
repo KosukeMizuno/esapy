@@ -8,7 +8,7 @@ import sys
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
-from .helper import reset_ipynb
+from .helper import reset_ipynb, ls_dir
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -92,6 +92,10 @@ def command_reset(args):
     reset_ipynb(args.target)
 
 
+def command_ls(args):
+    ls_dir(args.dir)
+
+
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
 subparsers = parser.add_subparsers()
 
@@ -139,6 +143,12 @@ parser_reset = subparsers.add_parser('reset', help='reset metadata',
                                      description='Clear metadata regarding with esapy in ipynb file.')
 parser_reset.set_defaults(handler=command_reset)
 parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook file which you want to reset')
+
+# ls
+parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
+                                     description='Show list of ipynb files and its post number if it has been uploaded.')
+parser_ls.set_defaults(handler=command_ls)
+parser_ls.add_argument('dir', metavar='<target directory>', default='.', nargs='?')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')
