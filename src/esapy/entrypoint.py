@@ -8,7 +8,7 @@ import sys
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
-
+from .helper import reset_ipynb
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -88,6 +88,10 @@ def command_config(args):
     _show_configuration()
 
 
+def command_reset(args):
+    reset_ipynb(args.target)
+
+
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
 subparsers = parser.add_subparsers()
 
@@ -129,6 +133,12 @@ parser_stats.set_defaults(handler=command_stats)
 parser_config = subparsers.add_parser('config', help='show your config',
                                       description="Show your config files and environment variables. Token and teamname can be addressed by rcfile ('~/%s'), environment variables ('%s', '%s'), and arguments ('--token', '--team'). The priority is args > environ > rcfile." % (RCFILE, KEY_TOKEN, KEY_TEAM))
 parser_config.set_defaults(handler=command_config)
+
+# reset
+parser_reset = subparsers.add_parser('reset', help='reset metadata',
+                                     description='Clear metadata regarding with esapy in ipynb file.')
+parser_reset.set_defaults(handler=command_reset)
+parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook file which you want to reset')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')
