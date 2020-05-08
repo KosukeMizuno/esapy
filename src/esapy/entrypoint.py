@@ -57,6 +57,7 @@ def command_up(args):
                 post_url = proc.upload_body()
                 browser_flg = args.browser
                 logger.info('post_url={:s}'.format(post_url))
+                print('post page URL ... {:s}'.format(post_url))
             except RuntimeError as e:
                 tb = sys.exc_info()[2]
                 logger.warn(e)
@@ -146,7 +147,7 @@ parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook f
 
 # ls
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
-                                     description='Show list of ipynb files and its post number if it has been uploaded.')
+                                  description='Show list of ipynb files and its post number if it has been uploaded.')
 parser_ls.set_defaults(handler=command_ls)
 parser_ls.add_argument('dir', metavar='<target directory>', default='.', nargs='?')
 

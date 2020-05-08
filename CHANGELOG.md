@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## [1.1.1] - 2020-05-08
+### Fixed
+- Scrolling has been enabled.
+- Single line output (proper close tag).
+
 ## [1.1.0] - 2020-05-05
 ### Added
 - subcommand: `ls`
