@@ -540,7 +540,6 @@ class IpynbProcessor(EsapyProcessorBase):
             logger.warn('This program supports nbformat=4.x')
 
         # info of notebook
-        print(self.nbjson['metadata']['kernelspec'])
         self.language = self.nbjson['metadata']['kernelspec']['language']
 
         # initialize metadata if required.
