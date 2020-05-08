@@ -511,6 +511,7 @@ class IpynbProcessor_via_nbconvert(MarkdownProcessor):
 
 class IpynbProcessor(EsapyProcessorBase):
     FILETYPE_SUFFIX = '.ipynb'
+    SCROLL_HEIGHT = 200
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -695,6 +696,12 @@ class IpynbProcessor(EsapyProcessorBase):
             func = func_dict[b['output_type']]
             md_output.extend(func(b))
 
+        # output scrolling
+        is_scrolled = cell_code.get('metadata', {}).get('scrolled', False)
+        if len(cell_code['outputs']) > 0 and is_scrolled:
+            md_output.insert(0, '\n\n<div style="overflow: scroll; height: {:d}pt;">\n\n'.format(self.SCROLL_HEIGHT))
+            md_output.append('\n\n</div>\n\n')
+
         # output folding
         if len(cell_code['outputs']) > 0:
             is_outputs_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('outputs_hidden', False)
@@ -712,9 +719,6 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # merge
         md = md_source + md_output
-
-        # output scrolling
-        pass  # TODO
 
         return md
 
