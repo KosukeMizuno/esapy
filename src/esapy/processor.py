@@ -268,7 +268,7 @@ class MarkdownProcessor(EsapyProcessorBase):
         logger.debug(info_dict)
 
         post_number = self.get_post_number()
-        if post_number is None  or self.args['post_mode'] == 'new':
+        if post_number is None or self.args['post_mode'] == 'new':
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = create_post(md_body,
                                         name=info_dict['name'],
@@ -720,11 +720,11 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _process_output_stream(self, output_stream):
         txt = [self._remove_ansi(l) for l in list(output_stream['text'])]
-        return ['\n', '```\n'] + txt + ['```\n', '\n']
+        return ['\n', '```\n'] + txt + ['\n', '```\n', '\n']
 
     def _process_output_result(self, output_result):
         if 'text/html' in output_result['data']:
-            md = ['\n'] + list(output_result['data']['text/html']) + ['\n']
+            md = ['\n', '\n'] + list(output_result['data']['text/html']) + ['\n', '\n']
 
         elif 'text/latex' in output_result['data']:
             md = []
@@ -735,7 +735,7 @@ class IpynbProcessor(EsapyProcessorBase):
                 md.append(line)
 
         else:  # text/plain
-            md = ['\n', '```\n'] + list(output_result['data']['text/plain']) + ['```\n', '\n']
+            md = ['\n', '```\n'] + list(output_result['data']['text/plain']) + ['\n', '```\n', '\n']
 
         return md
 
