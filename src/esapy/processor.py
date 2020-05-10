@@ -698,13 +698,13 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # source folding
         is_source_hidden = cell_code.get('metadata', {}).get('jupyter', {}).get('source_hidden', False)
-        is_matplotlib_cell = len(cell_code['source']) > 0 and re.match(r'^plt\.figure', cell_code['source'][0]) is not None
-        is_open = (self.args['folding_mode'] == 'ignore') or not ((self.args['folding_mode'] == 'auto' and is_matplotlib_cell) or is_source_hidden)
+        is_esapy_folded = any([self._includes_magic(l) for l in md_source])
+        is_open = (self.args['folding_mode'] == 'ignore') or not ((self.args['folding_mode'] == 'auto' and is_esapy_folded) or is_source_hidden)
 
         execution_count = cell_code.get('execution_count', 0)
         execution_count = execution_count if execution_count is not None else 0
 
-        summary = 'code source (matplotlib)' if is_matplotlib_cell else 'code source'
+        summary = 'code source (with %esapy_fold)' if is_esapy_folded else 'code source'
 
         md_source = ['\n',
                      '<details open>\n' if is_open else '<details>\n',
@@ -981,6 +981,16 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _remove_ansi(self, s):
         return re.sub(r'\x1b[^m]*m', '', s)
+
+    def _includes_magic(self, l):
+        m = re.search(r'%esapy_fold', l)
+        if m is None:
+            return False
+
+        if re.search('#', l[:m.start()]) is None:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':
