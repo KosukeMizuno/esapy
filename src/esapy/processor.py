@@ -704,7 +704,7 @@ class IpynbProcessor(EsapyProcessorBase):
         execution_count = cell_code.get('execution_count', 0)
         execution_count = execution_count if execution_count is not None else 0
 
-        summary = 'code source (matplotlib)' if is_matplotlib_cell else 'code source'
+        summary = 'code source (with %esapy_fold)' if is_esapy_folded else 'code source'
 
         md_source = ['\n',
                      '<details open>\n' if is_open else '<details>\n',
