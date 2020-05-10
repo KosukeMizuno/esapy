@@ -982,9 +982,6 @@ class IpynbProcessor(EsapyProcessorBase):
     def _remove_ansi(self, s):
         return re.sub(r'\x1b[^m]*m', '', s)
 
-    def _escape_inlinemath(self, l):
-        pass
-
 
 if __name__ == '__main__':
     import os
