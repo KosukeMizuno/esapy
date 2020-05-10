@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+### Fixed
+- gathering post info by esa.io api before patch the post
+- ignore message used in previous patch
+
+### Changed
+- sustain hashdict by esa-reset (default)
+
+### Added
+- `esa reset`
+  - `--clear-hashdict` option
+  - `--number` option
+
 ## [1.1.1] - 2020-05-08
 ### Fixed
 - Scrolling has been enabled.

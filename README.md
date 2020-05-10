@@ -63,6 +63,7 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 
 ### commands
 This package registers following command line tools.
+
 - `esa up <input_filepath>`
   - upload your file
   - supported format: ipynb, tex, and md
@@ -74,12 +75,13 @@ This package registers following command line tools.
   - show statistics of your team
   - This command can be used for access test.
 
-- `esa reset <target.ipynb>`
+- `esa reset <target.ipynb> [--number <post_number>]`
   - remove upload history by esapy in notebook file
+  - new post_number can be assigned
 
 - `esa ls <dirname>`
   - show notebook list in the directory
-  - `<dirname>` can be abbreveated. Default=`.`
+  - `<dirname>` can be abbreveated. Default is the current working directory.
 
 ### config file
 The config file (`~/.esapyrc`) should be written in yaml format.
