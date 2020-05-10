@@ -12,7 +12,7 @@ import base64
 import hashlib
 import json
 
-from .api import upload_binary, create_post, patch_post
+from .api import upload_binary, create_post, patch_post, get_post
 from .loadrc import get_token_and_team
 
 # logger
@@ -828,7 +828,7 @@ class IpynbProcessor(EsapyProcessorBase):
                                          team=self.args['team'],
                                          proxy=self.args['proxy'])
 
-            s_link = '[{:s}]({:s})\n\n'.format(str(self.path_input), ipynb_url)
+            s_link = 'ipynb file -> [{:s}]({:s})\n\n'.format(str(self.path_input), ipynb_url)
             md_body = s_link + md_body
         except RuntimeError as e:
             logger.warn('uploading ipynb file itself failed.')
@@ -898,29 +898,29 @@ class IpynbProcessor(EsapyProcessorBase):
     def is_uploaded(self):
         return self.get_post_number() is not None
 
-    def _get_post_info(self):
-        '''get post information for save derived from HTTP_RESPONSE
-        '''
-        if self.post_info is None:
-            return ''
-
-        yf = ['---',
-              'title: "{:s}"'.format(self.post_info['name']),
-              'category: {:s}'.format(self.post_info['category']),
-              'tags: {:s}'.format(', '.join(self.post_info['tags'])),
-              'created_at: {:s}'.format(self.post_info['created_at']),
-              'updated_at: {:s}'.format(self.post_info['updated_at']),
-              'published: {:s}'.format(str(not self.post_info['wip']).lower()),
-              'number: {:s}'.format(str(self.post_info['number'])),
-              '---\n']
-        yf = '\n'.join(yf)
-        return yf
-
     def gather_post_info(self):
         '''gathering informatin for create/update post
         '''
-        info_prev = self.nbjson['metadata']['esapy']['post_info']
-        d = {}
+        info_prev_metadata = self.nbjson['metadata']['esapy']['post_info']  # post_info written in metadata
+        number = info_prev_metadata['number']
+        info_prev = {}
+        if number is not None:
+            logger.info('post_number is not None. -> checking post/{:d} ...'.format(number))
+            try:
+                info_prev = get_post(number,
+                                     token=self.args['token'],
+                                     team=self.args['team'],
+                                     proxy=self.args['proxy'])
+                logger.info('getting post/{:d} was succeeded.'.format(number))
+            except RuntimeError as e:
+                logger.info('getting post/{:d} was failed. -> clearing post_number to set as None.'.format(number))
+                info_prev = info_prev_metadata
+                info_prev['number'] = None
+        else:
+            info_prev = info_prev_metadata
+        logger.info('info_prev has been gathered.')
+        logger.debug(info_prev)
+        d = {}  # dict to return
 
         # manage tags (None or list)
         tags = info_prev.get('tags', '')

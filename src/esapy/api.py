@@ -153,7 +153,7 @@ def patch_post(post_number, body_md, token=None, team=None, name=None, tags=None
                             message=message or "Update post via esapy",
                             body_md=body_md,
                             wip=wip))
-    if params['post']['name'][0] != '/':
+    if len(params['post']['name']) > 0 and params['post']['name'][0] != '/':
         params['post']['name'] = '/' + params['post']['name']
     if isinstance(tags, list) and all([isinstance(t, str) for t in tags]):
         params['post']['tags'] = tags
@@ -167,7 +167,7 @@ def patch_post(post_number, body_md, token=None, team=None, name=None, tags=None
         print(res)
         print(res.json())
         raise RuntimeError('Create post failed.')
-    logger.info('New post was successfully created.')
+    logger.info('Patching post was successfully created.')
 
     d = res.json()
     logger.debug(dict(d, **{'body_md': '<not shown>', 'body_html': '<not shown>'}))
