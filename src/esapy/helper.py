@@ -102,3 +102,8 @@ def ls_dir(dirname):
     for fn, is_uploaded, number in lst:
         n = '{:>12d}'.format(number) if number is not None else ' ' * 12
         print('{:s} | {:s}'.format(n, fn))
+
+
+def get_version():
+    import esapy
+    return esapy.__version__

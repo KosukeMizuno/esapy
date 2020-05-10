@@ -14,6 +14,7 @@ import json
 
 from .api import upload_binary, create_post, patch_post, get_post
 from .loadrc import get_token_and_team
+from .helper import get_version
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -872,6 +873,9 @@ class IpynbProcessor(EsapyProcessorBase):
         '''
         with self.path_ipynb.open('r', encoding='utf-8') as f:
             ipynb_json = json.load(f)
+
+        # record version
+        ipynb_json['metadata']['esapy']['version'] = get_version()
 
         if self.args['output'] is not None:
             # output が指定されている
