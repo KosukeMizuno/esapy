@@ -36,7 +36,7 @@ def reset_ipynb(target, post_number):
 
     if post_number is not None:
         j['metadata']['esapy'] = dict(post_info=dict(number=post_number))
-        logger.info('post_number={:s} has been set.')
+        logger.info('post_number={:d} has been set.'.format(post_number))
 
     # save
     with path_target.open('w', encoding='utf-8') as f:
