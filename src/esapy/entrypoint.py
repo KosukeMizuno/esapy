@@ -90,7 +90,7 @@ def command_config(args):
 
 
 def command_reset(args):
-    reset_ipynb(args.target, args.number)
+    reset_ipynb(args.target, args.number, args.clear_hashdict)
 
 
 def command_ls(args):
@@ -141,10 +141,11 @@ parser_config.set_defaults(handler=command_config)
 
 # reset
 parser_reset = subparsers.add_parser('reset', help='reset metadata',
-                                     description='Clear metadata regarding with esapy in ipynb file.')
+                                     description='Clear post_number of esapy in ipynb metadata.')
 parser_reset.set_defaults(handler=command_reset)
 parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook file which you want to reset')
 parser_reset.add_argument('--number', metavar='<post_number>', type=int, help='post_number to newly set')
+parser_reset.add_argument('--clear-hashdict', action='store_true', help='clear hashdict (map of uploaded images and urls)')
 
 # ls
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',

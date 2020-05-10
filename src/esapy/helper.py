@@ -8,7 +8,7 @@ from logging import getLogger, basicConfig, DEBUG, INFO
 logger = getLogger(__name__)
 
 
-def reset_ipynb(target, post_number):
+def reset_ipynb(target, post_number=None, clear_hashdict=False):
     '''Remove metadata in <target> ipynb file, 
     and write post_number in it if assigned.
     '''
@@ -31,11 +31,23 @@ def reset_ipynb(target, post_number):
         logger.info('No metadata regarding with esapy was detected.')
         return
 
-    j['metadata'].pop('esapy', None)
-    logger.info('Metadata was reset.')
+    # stash hashdict
+    if clear_hashdict:
+        h_dict = {}
+        logger.info('Hash dict was cleared.')
+    else:
+        h_dict = j['metadata']['esapy'].get('hashdict', {})
+        logger.info('Hash dict was stashed.')
+    logger.debug(h_dict)
 
+    # reset
+    j['metadata']['esapy'] = dict(hashdict=h_dict)
+    logger.info('Metadata was reset.')
+    logger.debug(j['metadata'])
+
+    # set post_number
     if post_number is not None:
-        j['metadata']['esapy'] = dict(post_info=dict(number=post_number))
+        j['metadata']['esapy']['post_info'] = dict(number=post_number)
         logger.info('post_number={:d} has been set.'.format(post_number))
 
     # save
