@@ -141,7 +141,7 @@ parser_config.set_defaults(handler=command_config)
 
 # reset
 parser_reset = subparsers.add_parser('reset', help='reset metadata',
-                                     description='Clear post_number of esapy in ipynb metadata.')
+                                     description='Clear post_number of esapy in ipynb metadata, or set post_number if given')
 parser_reset.set_defaults(handler=command_reset)
 parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook file which you want to reset')
 parser_reset.add_argument('--number', metavar='<post_number>', type=int, help='post_number to newly set')
