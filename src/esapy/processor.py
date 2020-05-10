@@ -14,6 +14,7 @@ import json
 
 from .api import upload_binary, create_post, patch_post, get_post
 from .loadrc import get_token_and_team
+from .helper import get_version
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -613,6 +614,31 @@ class IpynbProcessor(EsapyProcessorBase):
             else:
                 md[i] = '```\n'
 
+        # マークダウン中の inline math を `\` でエスケープ
+        is_display_math = False
+        for i in range(len(md)):
+            if md[i] == '```math\n':
+                is_display_math = True
+            elif md[i] == '```\n':
+                is_display_math = False
+            else:
+                if is_display_math:
+                    continue
+
+                # find characters to be escaped
+                lst = md[i].split('$')  # odd-index sring is inline math
+                for j in range(len(lst) // 2):
+                    idx = 2 * j + 1
+                    lst[idx] = re.sub(r'\\\\', r'\\\\\\\\', lst[idx])  # '\\' -> '\\\\' (escaping line break)
+                    lst[idx] = re.sub(r'(?<!\\)\\\s', r'\\\\ ', lst[idx])  # '\ ' -> '\\ ' (escaping hspace)
+                    for c in ('_', ',', '!', '#', '%', '&', '{', '}'):  # '\%' -> '\\%' など
+                        lst[idx] = re.sub(r'(?<!\\)\\{:s}'.format(c), r'\\\\{:s}'.format(c), lst[idx])
+                    lst[idx] = re.sub(r'\*', r'\\ast', lst[idx])  # '*'   -> '\ast'
+                    lst[idx] = re.sub(r"(?<!\^)'", r'^\\prime', lst[idx])  # "'"   -> '^\prime'
+                    lst[idx] = re.sub(r'(?<!\\)_', '\\_', lst[idx])  # 'a_i' -> 'a\_i'
+
+                md[i] = '$'.join(lst)
+
         # attachment があったら抽出
         at_images = {}  # key=attachment:(xxx.png), value=file path
         for at_name, v in cell_md.get('attachments', {}).items():
@@ -873,6 +899,9 @@ class IpynbProcessor(EsapyProcessorBase):
         with self.path_ipynb.open('r', encoding='utf-8') as f:
             ipynb_json = json.load(f)
 
+        # record version
+        ipynb_json['metadata']['esapy']['version'] = get_version()
+
         if self.args['output'] is not None:
             # output が指定されている
             p = Path(self.args['output'])
@@ -952,6 +981,9 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _remove_ansi(self, s):
         return re.sub(r'\x1b[^m]*m', '', s)
+
+    def _escape_inlinemath(self, l):
+        pass
 
 
 if __name__ == '__main__':

@@ -102,3 +102,15 @@ def ls_dir(dirname):
     for fn, is_uploaded, number in lst:
         n = '{:>12d}'.format(number) if number is not None else ' ' * 12
         print('{:s} | {:s}'.format(n, fn))
+
+
+def get_version():
+    import esapy
+
+    try:
+        import git
+        r = git.Repo(Path(esapy.__file__).parents[2])
+        return esapy.__version__ + '+' + str(r.head.commit)
+
+    except Exception as e:
+        return esapy.__version__

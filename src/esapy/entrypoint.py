@@ -8,7 +8,7 @@ import sys
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
-from .helper import reset_ipynb, ls_dir
+from .helper import reset_ipynb, ls_dir, get_version
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -175,6 +175,7 @@ def main():
         getLogger(__package__).setLevel(DEBUG)  # package logger
     elif args.verbose >= 1:
         getLogger(__package__).setLevel(INFO)  # package logger
+    logger.info('esapy version={:s}'.format(get_version()))
     logger.info('verbose level={:d}'.format(args.verbose))
     logger.debug('args={:s}'.format(str(args)))
 
