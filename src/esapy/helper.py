@@ -106,4 +106,11 @@ def ls_dir(dirname):
 
 def get_version():
     import esapy
-    return esapy.__version__
+
+    try:
+        import git
+        r = git.Repo(Path(esapy.__file__).parents[2])
+        return esapy.__version__ + '+' + str(r.head.commit)
+
+    except Exception as e:
+        return esapy.__version__

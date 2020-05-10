@@ -25,6 +25,7 @@ nbconvert = "*"
 [tool.poetry.dev-dependencies]
 autopep8 = "*"
 ipython = "*"
+gitpython = "*"
 
 
 [build-system]
