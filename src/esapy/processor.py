@@ -938,12 +938,15 @@ class IpynbProcessor(EsapyProcessorBase):
         # wip (bool)
         d['wip'] = not (not self.args['wip'] or not info_prev.get('wip', True))
 
-        # category, message, name (None or str)
+        # category, name (None or str)
         for k in ['category', 'message', 'name']:
             if self.args[k] is not None:
                 d[k] = self.args[k]
             else:
                 d[k] = info_prev.get(k, None)
+
+        # message (None or str)
+        d['message'] = self.args['message'] if 'message' in self.args else None
 
         return d
 
