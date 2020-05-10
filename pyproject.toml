@@ -19,13 +19,14 @@ python = "^3.4"
 pyyaml = "^5.1"
 requests = "*"
 nbconvert = "*"
+ipython = "*"
 
 
 
 [tool.poetry.dev-dependencies]
 autopep8 = "*"
-ipython = "*"
 gitpython = "*"
+jupyter = "*"
 
 
 [build-system]
