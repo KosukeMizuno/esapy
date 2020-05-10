@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 1.3.0 - [2020-05-10]
+### Addded
+- line/cell magic `esapy_fold` for code folding
+
+### Removed
+- check if a cell is a matplotlib cell by the first line -> magic command
+
 ## 1.2.0 - [2020-05-10]
 ### Fixed
 - gathering post info by esa.io api before patch the post
