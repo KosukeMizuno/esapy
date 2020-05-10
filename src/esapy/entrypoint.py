@@ -90,7 +90,7 @@ def command_config(args):
 
 
 def command_reset(args):
-    reset_ipynb(args.target)
+    reset_ipynb(args.target, args.number)
 
 
 def command_ls(args):
@@ -144,6 +144,7 @@ parser_reset = subparsers.add_parser('reset', help='reset metadata',
                                      description='Clear metadata regarding with esapy in ipynb file.')
 parser_reset.set_defaults(handler=command_reset)
 parser_reset.add_argument('target', metavar='<filepath>.ipynb', help='notebook file which you want to reset')
+parser_reset.add_argument('--number', metavar='<post_number>', type=int, help='post_number to newly set')
 
 # ls
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',

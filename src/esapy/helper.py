@@ -8,7 +8,10 @@ from logging import getLogger, basicConfig, DEBUG, INFO
 logger = getLogger(__name__)
 
 
-def reset_ipynb(target):
+def reset_ipynb(target, post_number):
+    '''Remove metadata in <target> ipynb file, 
+    and write post_number in it if assigned.
+    '''
     logger.info('subcommand `Reset`')
     logger.info('  target={:s}'.format(target))
     path_target = Path(target)
@@ -30,6 +33,10 @@ def reset_ipynb(target):
 
     j['metadata'].pop('esapy', None)
     logger.info('Metadata was reset.')
+
+    if post_number is not None:
+        j['metadata']['esapy'] = dict(post_info=dict(number=post_number))
+        logger.info('post_number={:s} has been set.')
 
     # save
     with path_target.open('w', encoding='utf-8') as f:
