@@ -29,7 +29,8 @@ def reset_ipynb(target, post_number=None, clear_hashdict=False):
     # reset metadata
     if 'esapy' not in j['metadata']:
         logger.info('No metadata regarding with esapy was detected.')
-        return
+        j['metadata']['esapy'] = dict()
+        logger.info('Metadata was initialized.')
 
     # stash hashdict
     if clear_hashdict:
