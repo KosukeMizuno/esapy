@@ -177,7 +177,3 @@ def patch_post(post_number, body_md, token=None, team=None, name=None, tags=None
         logger.warning('!!! 3 way merge and conflicting has been occured !!!')
 
     return d['url'], res
-
-
-if __name__ == '__main__':
-    pass

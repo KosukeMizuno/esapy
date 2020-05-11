@@ -991,34 +991,3 @@ class IpynbProcessor(EsapyProcessorBase):
             return True
         else:
             return False
-
-
-if __name__ == '__main__':
-    import os
-    import json
-    path_input = Path('test_nbformat.json')
-
-    with path_input.open('r', encoding='utf-8') as f:
-        ipynb_json = json.load(f)
-
-    # attachement 抽出のテスト
-    cell = ipynb_json['cells'][7]
-
-    import base64
-    fn_testpng = 'attachment_test.png'
-    with open(fn_testpng, 'wb') as f:
-        dat = cell['attachments']['image.png']['image/png']
-        en_dat = base64.b64decode(dat)
-        f.write(en_dat)
-
-    # sha256
-    import hashlib
-    m = hashlib.sha256()
-    m.update(en_dat)
-    print(m.hexdigest())
-
-    # sha256 from file
-    m_file = hashlib.sha256()
-    with open(fn_testpng, 'rb') as f:
-        m_file.update(f.read())
-        print(m_file.hexdigest())

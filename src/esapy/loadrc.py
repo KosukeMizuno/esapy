@@ -100,7 +100,3 @@ def _get_token_from_rcfile():
         logger.debug('Getting token from rcfile failed.')
 
     return x
-
-
-if __name__ == '__main__':
-    pass
