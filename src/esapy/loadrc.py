@@ -51,7 +51,8 @@ def get_token_and_team(args):
         logger.info('The token and teamname are set from rcfile.')
         return x
 
-    raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.' % (RCFILE, KEY_TOKEN, KEY_TEAM))
+    raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.'
+                       % (RCFILE, KEY_TOKEN, KEY_TEAM))
 
 
 def _get_token_from_args(args):
