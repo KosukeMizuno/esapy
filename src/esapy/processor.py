@@ -293,7 +293,6 @@ class MarkdownProcessor(EsapyProcessorBase):
                                        proxy=self.args['proxy'])
 
         self.post_info = res.json()
-        self.nbjson
 
         self.result_upload = True
 
