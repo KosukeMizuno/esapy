@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 1.3.2 - [2020-06-13]
+### Fixed
+- Suppress meaningless error message during uploading a md file
+
 ## 1.3.1 - [2020-05-12]
 ### Fixed
 - Calling `esa reset`  to set post_number in an ipynb file which has not been uploaded didn't work.
