@@ -8,7 +8,7 @@ python-versions = "*"
 version = "0.1.0"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Classes Without Boilerplate"
 name = "attrs"
 optional = false
@@ -42,7 +42,7 @@ python-versions = "*"
 version = "0.2.0"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "An easy safelist-based HTML-sanitizing tool."
 name = "bleach"
 optional = false
@@ -59,7 +59,7 @@ description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
 optional = false
 python-versions = "*"
-version = "2020.4.5.2"
+version = "2020.6.20"
 
 [[package]]
 category = "main"
@@ -87,7 +87,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 version = "4.4.2"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "XML bomb protection for Python stdlib modules"
 name = "defusedxml"
 optional = false
@@ -95,7 +95,7 @@ python-versions = "*"
 version = "0.5.0"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Discover and load entry points from installed packages."
 name = "entrypoints"
 optional = false
@@ -103,7 +103,7 @@ python-versions = ">=2.7"
 version = "0.3"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Git Object Database"
 name = "gitdb"
 optional = false
@@ -114,7 +114,7 @@ version = "4.0.5"
 smmap = ">=3.0.1,<4"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python Git Library"
 name = "gitpython"
 optional = false
@@ -133,7 +133,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.8"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Read metadata from Python packages"
 marker = "python_version < \"3.8\""
 name = "importlib-metadata"
@@ -252,7 +252,7 @@ qa = ["flake8 (3.7.9)"]
 testing = ["colorama (0.4.1)", "docopt", "pytest (>=3.9.0,<5.0.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "A very fast and expressive template engine."
 name = "jinja2"
 optional = false
@@ -266,7 +266,7 @@ MarkupSafe = ">=0.23"
 i18n = ["Babel (>=0.8)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "An implementation of JSON Schema validation for Python"
 name = "jsonschema"
 optional = false
@@ -340,7 +340,7 @@ pygments = "*"
 test = ["mock", "pexpect"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 name = "jupyter-core"
 optional = false
@@ -352,7 +352,7 @@ pywin32 = ">=1.0"
 traitlets = "*"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Safely add untrusted strings to HTML/XML markup."
 name = "markupsafe"
 optional = false
@@ -360,7 +360,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 version = "1.1.1"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "The fastest markdown parser in pure Python"
 name = "mistune"
 optional = false
@@ -368,7 +368,7 @@ python-versions = "*"
 version = "0.8.4"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Converting Jupyter Notebooks"
 name = "nbconvert"
 optional = false
@@ -396,7 +396,7 @@ serve = ["tornado (>=4.0)"]
 test = ["pytest", "pytest-cov", "ipykernel", "jupyter-client (>=4.2)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "The Jupyter Notebook format"
 name = "nbformat"
 optional = false
@@ -439,7 +439,7 @@ traitlets = ">=4.2.1"
 test = ["nose", "coverage", "requests", "nose-warnings-filters", "nbval", "nose-exclude", "selenium", "mock", "nose-exclude"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Utilities for writing pandoc filters in python"
 name = "pandocfilters"
 optional = false
@@ -537,7 +537,7 @@ python-versions = "*"
 version = "2.3.1"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Persistent/Functional/Immutable data structures"
 name = "pyrsistent"
 optional = false
@@ -559,7 +559,7 @@ version = "2.8.1"
 six = ">=1.5"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Python for Window Extensions"
 marker = "sys_platform == \"win32\""
 name = "pywin32"
@@ -665,7 +665,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 version = "1.15.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A pure Python implementation of a sliding window memory map manager"
 name = "smmap"
 optional = false
@@ -694,7 +694,7 @@ pywinpty = ">=0.5"
 tornado = ">=4"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Test utilities for code working with files and commands"
 name = "testpath"
 optional = false
@@ -750,8 +750,8 @@ category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
-version = "1.24.3"
+python-versions = "*"
+version = "1.22"
 
 [package.extras]
 secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
@@ -766,7 +766,7 @@ python-versions = "*"
 version = "0.2.4"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Character encoding aliases for legacy web content"
 name = "webencodings"
 optional = false
@@ -794,7 +794,7 @@ python-versions = "*"
 version = "0.5"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 marker = "python_version < \"3.8\""
 name = "zipp"
@@ -807,8 +807,8 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "aa1c93ff90bc02e6df425135837cf2dba7d45ec1f052a8e3d87cbe8a6e0f360d"
-python-versions = "^3.4"
+content-hash = "727e162f3e70c6be25f77d215deb241e79a6e98d39ec5c717d8742208e51e613"
+python-versions = ">=3.4"
 
 [metadata.files]
 appnope = [
@@ -831,8 +831,8 @@ bleach = [
     {file = "bleach-3.1.2.tar.gz", hash = "sha256:f0b1ee0315062e60afa6b7cc39b1c3718b591e1d552a8841044dc49a68465659"},
 ]
 certifi = [
-    {file = "certifi-2020.4.5.2-py2.py3-none-any.whl", hash = "sha256:9cd41137dc19af6a5e03b630eefe7d1f458d964d406342dd3edf625839b944cc"},
-    {file = "certifi-2020.4.5.2.tar.gz", hash = "sha256:5ad7e9a056d25ffa5082862e36f119f7f7cec6457fa07ee2f8c339814b80c9b1"},
+    {file = "certifi-2020.6.20-py2.py3-none-any.whl", hash = "sha256:8fc0819f1f30ba15bdb34cceffb9ef04d99f420f68eb75d901e9560b8749fc41"},
+    {file = "certifi-2020.6.20.tar.gz", hash = "sha256:5930595817496dd21bb8dc35dad090f1c2cd0adfaf21204bf6732ca5d8ee34d3"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -1143,8 +1143,8 @@ typing = [
     {file = "typing-3.7.4.1.tar.gz", hash = "sha256:91dfe6f3f706ee8cc32d38edbbf304e9b7583fb37108fef38229617f8b3eba23"},
 ]
 urllib3 = [
-    {file = "urllib3-1.24.3-py2.py3-none-any.whl", hash = "sha256:a637e5fae88995b256e3409dc4d52c2e2e0ba32c42a6365fee8bbd2238de3cfb"},
-    {file = "urllib3-1.24.3.tar.gz", hash = "sha256:2393a695cd12afedd0dcb26fe5d50d0cf248e5a66f75dbd89a3d4eb333a61af4"},
+    {file = "urllib3-1.22-py2.py3-none-any.whl", hash = "sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b"},
+    {file = "urllib3-1.22.tar.gz", hash = "sha256:cc44da8e1145637334317feebd728bd869a35285b93cbb4cca2577da7e62db4f"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.4-py2.py3-none-any.whl", hash = "sha256:79375666b9954d4a1a10739315816324c3e73110af9d0e102d906fdb0aec009f"},
