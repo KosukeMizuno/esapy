@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 1.3.3 - [2020-08-16]
+### Fixed
+- Unquoting URL encode of image tag in markdown cell of jupyter notebook. 
+
 ## 1.3.2 - [2020-06-13]
 ### Fixed
 - Suppress meaningless error message during uploading a md file
