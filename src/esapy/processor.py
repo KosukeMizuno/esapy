@@ -665,11 +665,11 @@ class IpynbProcessor(EsapyProcessorBase):
                     continue
 
                 alttxt = m.group(1)
-                path_img = Path(fn)
+                path_img = self.path_root / Path(unquote(fn))
                 try:
                     url = self._upload_image_and_get_url(path_img)
                 except RuntimeError:
-                    url = str(path_img)
+                    url = unquote(fn)
                     alttxt = alttxt + ' (upload failed)'
 
                 _l = _l[:m.start()] \
