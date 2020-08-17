@@ -57,41 +57,46 @@ def reset_ipynb(target, post_number=None, clear_hashdict=False):
         logger.info('Saved.')
 
 
-def ls_dir(dirname):
-    path_dir = Path(dirname)
-    logger.info('showing ipynb list in {:s}'.format(str(path_dir.resolve())))
+def ls_dir_or_file(filepath):
+    path_target = Path(filepath)
 
-    if not path_dir.is_dir():
-        logger.warning('Assigned directory is not dir.')
-        return
+    lst = []  # (filename, is_uploaded, number)
 
     # make list
-    lst = []  # (filename, is_uploaded, number)
-    for p in path_dir.iterdir():
-        if p.suffix != '.ipynb':
-            continue
+    def get_nb_info(path_nb):
+        if path_nb.suffix != '.ipynb':
+            return
 
-        logger.info('an ipynb file is detected={:s}'.format(str(p)))
+        logger.info('an ipynb file is detected={:s}'.format(str(path_nb)))
 
-        with p.open('r', encoding='utf-8') as f:
+        with path_nb.open('r', encoding='utf-8') as f:
             j = json.load(f)
 
         if 'esapy' not in j['metadata']:
             logger.info('  This file doesn\'t have esapy metadata.')
-            lst.append((p.name, False, None))
-            continue
+            lst.append((path_nb.name, False, None))
+            return
 
         n = j['metadata']['esapy'].get('post_info', {}).get('number', None)
         if n is not None:
             logger.info('  Post number={:d}'.format(n))
-            lst.append((p.name, True, n))
+            lst.append((path_nb.name, True, n))
         else:
             logger.info('  Unuploaded file.')
-            lst.append((p.name, False, None))
+            lst.append((path_nb.name, False, None))
+
+    if path_target.is_dir():
+        path_target = Path(filepath)
+        logger.info('showing ipynb list in {:s}'.format(str(path_target.resolve())))
+
+        for p in path_target.iterdir():
+            get_nb_info(p)
+    else:
+        get_nb_info(path_target)
 
     # length check
     if len(lst) == 0:
-        print('No ipynb in {:s}'.format(str(path_dir.resolve())))
+        print('No ipynb was found.')
         return
 
     lst = sorted(lst, key=lambda x: x[0])

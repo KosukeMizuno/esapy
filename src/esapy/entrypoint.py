@@ -8,7 +8,7 @@ import sys
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
-from .helper import reset_ipynb, ls_dir, get_version
+from .helper import reset_ipynb, ls_dir_or_file, get_version
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -94,7 +94,7 @@ def command_reset(args):
 
 
 def command_ls(args):
-    ls_dir(args.dir)
+    ls_dir_or_file(args.dir)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
