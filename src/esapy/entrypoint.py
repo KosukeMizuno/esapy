@@ -94,7 +94,8 @@ def command_reset(args):
 
 
 def command_ls(args):
-    ls_dir_or_file(args.dir)
+    # TODO: 複数引数を受け入れられるようにする
+    ls_dir_or_file(args.target)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
@@ -151,7 +152,7 @@ parser_reset.add_argument('--clear-hashdict', action='store_true', help='clear h
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
                                   description='Show list of ipynb files and its post number if it has been uploaded.')
 parser_ls.set_defaults(handler=command_ls)
-parser_ls.add_argument('dir', metavar='<target directory>', default='.', nargs='?')
+parser_ls.add_argument('target', metavar='<target directory or filepath>', default='.', nargs='?')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')
