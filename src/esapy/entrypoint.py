@@ -94,7 +94,9 @@ def command_reset(args):
 
 
 def command_ls(args):
-    ls_dir_or_file(args.target, grid=not args.no_grid)
+    ls_dir_or_file(args.target,
+                   use_fullpath=(args.mode == 'full'),
+                   grid=not args.no_grid)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
@@ -151,7 +153,8 @@ parser_reset.add_argument('--clear-hashdict', action='store_true', help='clear h
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
                                   description='Show list of ipynb files and its post number if it has been uploaded.')
 parser_ls.set_defaults(handler=command_ls)
-parser_ls.add_argument('target', metavar='<target directory or filepath>', default='.', nargs='*')
+parser_ls.add_argument('target', metavar='<target>', default='.', nargs='*', help='filepath of ipynb or directory')
+parser_ls.add_argument('--mode', type=str, choices=['full', 'base'], default='full', help='filename as full-path or basename, default is full.')
 parser_ls.add_argument('--no-grid', action='store_true', help='print only post_number and filename')
 
 # common arguments
