@@ -121,8 +121,9 @@ def ls_dir_or_file(filepath, use_fullpath=True, grid=True):
     if grid:
         print(' post_number | filename ')
         print('-------------|------------')
+
     for path, is_uploaded, number in lst:
-        n = '{:>12d}'.format(number) if number is not None else ' ' * 12
+        n = '{:>12d}'.format(number) if number is not None else ' ' * 11 + '.'
         fn = str(path.absolute()) if use_fullpath else path.name
         g = '|' if grid else ''
         print('{:s} {:s} {:s}'.format(n, g, fn))

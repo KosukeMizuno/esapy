@@ -94,8 +94,7 @@ def command_reset(args):
 
 
 def command_ls(args):
-    # TODO: 複数引数を受け入れられるようにする
-    ls_dir_or_file(args.target)
+    ls_dir_or_file(args.target, grid=not args.no_grid)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
