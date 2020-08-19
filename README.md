@@ -82,7 +82,7 @@ This package registers following command line tools.
   - remove upload history by esapy in notebook file
   - new post_number can be assigned
 
-- `esa ls <dirname>`
+- `esa ls <dirname or filepath>`
   - show notebook list in the directory
   - `<dirname>` can be abbreveated. Default is the current working directory.
 

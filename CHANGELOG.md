@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 1.3.4 - [2020-08-19]
+### Added
+- `esa ls` can receive multiple-arguments as dirpath or filepath.
+- Some options were added to `esa ls`.
+
 ## 1.3.3 - [2020-08-16]
 ### Fixed
 - Unquoting URL encode of image tag in markdown cell of jupyter notebook. 
