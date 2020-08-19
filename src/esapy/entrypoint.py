@@ -152,7 +152,8 @@ parser_reset.add_argument('--clear-hashdict', action='store_true', help='clear h
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
                                   description='Show list of ipynb files and its post number if it has been uploaded.')
 parser_ls.set_defaults(handler=command_ls)
-parser_ls.add_argument('target', metavar='<target directory or filepath>', default='.', nargs='?')
+parser_ls.add_argument('target', metavar='<target directory or filepath>', default='.', nargs='*')
+parser_ls.add_argument('--no-grid', action='store_true', help='print only post_number and filename')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')
