@@ -8,7 +8,7 @@ import sys
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
 from .api import get_team_stats
-from .helper import reset_ipynb, ls_dir, get_version
+from .helper import reset_ipynb, ls_dir_or_file, get_version
 
 # logger
 from logging import getLogger, basicConfig, DEBUG, INFO
@@ -94,7 +94,9 @@ def command_reset(args):
 
 
 def command_ls(args):
-    ls_dir(args.dir)
+    ls_dir_or_file(args.target,
+                   use_fullpath=(args.mode == 'full'),
+                   grid=not args.no_grid)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
@@ -151,7 +153,9 @@ parser_reset.add_argument('--clear-hashdict', action='store_true', help='clear h
 parser_ls = subparsers.add_parser('ls', help='show ipynb file list',
                                   description='Show list of ipynb files and its post number if it has been uploaded.')
 parser_ls.set_defaults(handler=command_ls)
-parser_ls.add_argument('dir', metavar='<target directory>', default='.', nargs='?')
+parser_ls.add_argument('target', metavar='<target>', default='.', nargs='*', help='filepath of ipynb or directory')
+parser_ls.add_argument('--mode', type=str, choices=['full', 'base'], default='full', help='filename as full-path or basename, default is full.')
+parser_ls.add_argument('--no-grid', action='store_true', help='print only post_number and filename')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')

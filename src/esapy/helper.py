@@ -9,7 +9,7 @@ logger = getLogger(__name__)
 
 
 def reset_ipynb(target, post_number=None, clear_hashdict=False):
-    '''Remove metadata in <target> ipynb file, 
+    '''Remove metadata in <target> ipynb file,
     and write post_number in it if assigned.
     '''
     logger.info('subcommand `Reset`')
@@ -57,52 +57,76 @@ def reset_ipynb(target, post_number=None, clear_hashdict=False):
         logger.info('Saved.')
 
 
-def ls_dir(dirname):
-    path_dir = Path(dirname)
-    logger.info('showing ipynb list in {:s}'.format(str(path_dir.resolve())))
+def ls_dir_or_file(filepath, use_fullpath=True, grid=True):
+    """[summary]
 
-    if not path_dir.is_dir():
-        logger.warning('Assigned directory is not dir.')
-        return
+    Parameters
+    ----------
+    filepath : str or Sequence[str]
+    """
+    if isinstance(filepath, str):
+        lst_target = [filepath]
+    else:
+        lst_target = filepath
+
+    lst = []  # (filename, is_uploaded, number)
 
     # make list
-    lst = []  # (filename, is_uploaded, number)
-    for p in path_dir.iterdir():
-        if p.suffix != '.ipynb':
-            continue
+    def get_nb_info(path_nb):
+        if path_nb.suffix != '.ipynb':
+            return
 
-        logger.info('an ipynb file is detected={:s}'.format(str(p)))
+        logger.info('an ipynb file is detected={:s}'.format(str(path_nb)))
 
-        with p.open('r', encoding='utf-8') as f:
-            j = json.load(f)
+        try:
+            with path_nb.open('r', encoding='utf-8') as f:
+                j = json.load(f)
+        except FileNotFoundError:
+            logger.info('  Opening {:s} failed.')
+            return
 
         if 'esapy' not in j['metadata']:
             logger.info('  This file doesn\'t have esapy metadata.')
-            lst.append((p.name, False, None))
-            continue
+            lst.append((path_nb, False, None))
+            return
 
         n = j['metadata']['esapy'].get('post_info', {}).get('number', None)
         if n is not None:
             logger.info('  Post number={:d}'.format(n))
-            lst.append((p.name, True, n))
+            lst.append((path_nb, True, n))
         else:
             logger.info('  Unuploaded file.')
-            lst.append((p.name, False, None))
+            lst.append((path_nb, False, None))
+
+    # make list
+    for fn_target in lst_target:
+        path_target = Path(fn_target)
+        if path_target.is_dir():
+            logger.info('gathering ipynb list in {:s}'.format(str(path_target.resolve())))
+
+            for p in path_target.iterdir():
+                get_nb_info(p)
+        else:
+            logger.info('gathering {:s}'.format(str(path_target.resolve())))
+            get_nb_info(path_target)
 
     # length check
     if len(lst) == 0:
-        print('No ipynb in {:s}'.format(str(path_dir.resolve())))
+        print('No ipynb was found.')
         return
 
     lst = sorted(lst, key=lambda x: x[0])
-    max_len = max([len(l[0]) for l in lst])
 
     logger.info('showing file list')
-    print(' post_number | filename ')
-    print('-------------|-' + '-' * max_len)
-    for fn, is_uploaded, number in lst:
-        n = '{:>12d}'.format(number) if number is not None else ' ' * 12
-        print('{:s} | {:s}'.format(n, fn))
+    if grid:
+        print(' post_number | filename ')
+        print('-------------|------------')
+
+    for path, is_uploaded, number in lst:
+        n = '{:>12d}'.format(number) if number is not None else ' ' * 11 + '.'
+        fn = str(path.absolute()) if use_fullpath else path.name
+        g = '|' if grid else ''
+        print('{:s} {:s} {:s}'.format(n, g, fn))
 
 
 def get_version():

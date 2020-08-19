@@ -56,12 +56,15 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 
 1. access the new post and edit.
 
-1. if process fails due to a network problem, you can check by `esa stats`.
+If process fails due to a network problem, you can check by `esa stats`.
 
+Whether an ipynb file has been already uploaded can be checked by `esa ls <filepath or dirpath>`.
+For list up all notebooks recursively, `esa ls $(find . -name "*.ipynb" | grep -v ".ipynb_checkpoints" | sort)`, for example.
 
 ## DOCUMENT
 
 ### commands
+
 This package registers following command line tools.
 
 - `esa up <input_filepath>`
@@ -84,8 +87,10 @@ This package registers following command line tools.
   - `<dirname>` can be abbreveated. Default is the current working directory.
 
 ### config file
+
 The config file (`~/.esapyrc`) should be written in yaml format.
 An example is shown below.
+
 ```yaml: ~/.esapyrc
 token: your_token
 team: your_team
@@ -100,6 +105,8 @@ team: your_team
 1. `poetry install`
 1. `git checkout develop`
 
+
 ## LICENSE
+
 Copyright (c) 2020 Kosuke Mizuno  
 This package is released under the MIT license (see [LICENSE](LICENSE) file).
