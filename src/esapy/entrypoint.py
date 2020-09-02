@@ -96,7 +96,8 @@ def command_reset(args):
 def command_ls(args):
     ls_dir_or_file(args.target,
                    use_fullpath=(args.mode == 'full'),
-                   grid=not args.no_grid)
+                   grid=not args.no_grid,
+                   recursive=args.recursive)
 
 
 parser = argparse.ArgumentParser(description='Python implementation for esa.io.')
@@ -156,6 +157,7 @@ parser_ls.set_defaults(handler=command_ls)
 parser_ls.add_argument('target', metavar='<target>', default='.', nargs='*', help='filepath of ipynb or directory')
 parser_ls.add_argument('--mode', type=str, choices=['full', 'base'], default='full', help='filename as full-path or basename, default is full.')
 parser_ls.add_argument('--no-grid', action='store_true', help='print only post_number and filename')
+parser_ls.add_argument('--recursive', action='store_true', help='scan subfolder recursively')
 
 # common arguments
 g_up_network = parser.add_argument_group('optional arguments for network config')

@@ -57,7 +57,7 @@ def reset_ipynb(target, post_number=None, clear_hashdict=False):
         logger.info('Saved.')
 
 
-def ls_dir_or_file(filepath, use_fullpath=True, grid=True):
+def ls_dir_or_file(filepath, use_fullpath=True, grid=True, recursive=True):
     """[summary]
 
     Parameters
@@ -104,7 +104,8 @@ def ls_dir_or_file(filepath, use_fullpath=True, grid=True):
         if path_target.is_dir():
             logger.info('gathering ipynb list in {:s}'.format(str(path_target.resolve())))
 
-            for p in path_target.iterdir():
+            plist = path_target.glob('**/*.ipynb') if recursive else path_target.iterdir()
+            for p in plist:
                 get_nb_info(p)
         else:
             logger.info('gathering {:s}'.format(str(path_target.resolve())))
