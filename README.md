@@ -59,7 +59,7 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 If process fails due to a network problem, you can check by `esa stats`.
 
 Whether an ipynb file has been already uploaded can be checked by `esa ls <filepath or dirpath>`.
-For list up all notebooks recursively, `esa ls $(find . -name "*.ipynb" | grep -v ".ipynb_checkpoints" | sort)`, for example.
+For list up all notebooks recursively, `esa ls --recursive`.
 
 ## DOCUMENT
 
