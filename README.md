@@ -96,6 +96,14 @@ token: your_token
 team: your_team
 ```
 
+### TIPS
+
+Combination with fuzzy finders like [fzf](https://github.com/junegunn/fzf) is useful.
+For example,
+
+```sh: ~/.bashrc
+alias esafu='esa up --no-browser "$(esa ls | fzf | sed -r "s/(.+)\\| (.+)/\\2/")"'
+```
 
 ## INSTALLATION for DEVELOPMENT
 
