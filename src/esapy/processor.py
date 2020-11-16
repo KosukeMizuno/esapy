@@ -885,6 +885,8 @@ class IpynbProcessor(EsapyProcessorBase):
 
         self.post_info = res.json()
         self.nbjson['metadata']['esapy']['post_info'] = self.post_info
+        self.nbjson['metadata']['esapy']['post_info'].pop('body_html')  # clear body, because body is generally large but didn't be used,
+        self.nbjson['metadata']['esapy']['post_info'].pop('body_md')
         self.result_upload = self.is_uploaded()
 
         with self.path_ipynb.open('w', encoding='utf-8') as f:
