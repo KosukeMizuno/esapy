@@ -1,3 +1,11 @@
+[tool.autopep8]
+max_line_length = 120
+ignore = "E501,E266,E402"
+# E501: Line to long ((length) > 79 characters)
+# E266: Too many leading '#' for block comment
+# E402: Module level import not at top of file
+
+
 [tool.poetry]
 name = "esapy"
 version = "1.3.5"
@@ -28,6 +36,7 @@ pydocstyle = "*"
 pycodestyle = "*"
 autopep8 = "*"
 jupyter = "*"
+pip = "^21.0.1"
 
 
 
