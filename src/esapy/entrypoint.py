@@ -186,7 +186,10 @@ def main():
     logger.debug('args={:s}'.format(str(args)))
 
     # call each function
-    args.handler(args)
+    if hasattr(args, 'handler'):
+        args.handler(args)
+    else:
+        parser.print_help()
 
 
 if __name__ == '__main__':
