@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 1.3.6 - [2021-03-15]
+### Added
+- Insert warnings for local editing.
+
+### Fixed
+- Handle an error when no args is provided.
+
 ## 1.3.5 - [2020-09-02]
 ### Added
 - `esa ls` can recursively scan files in subfolder with `--recursive` option.

@@ -8,7 +8,7 @@ ignore = "E501,E266,E402"
 
 [tool.poetry]
 name = "esapy"
-version = "1.3.5"
+version = "1.3.6"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
 description = "A python implementation of esa.io API"
 readme = "README.md"
@@ -26,7 +26,6 @@ esa = 'esapy.entrypoint:main'
 python = ">=3.4"
 pyyaml = "*"
 requests = "*"
-ipython = ">=6"
 gitpython = "*"
 
 
@@ -36,6 +35,7 @@ pydocstyle = "*"
 pycodestyle = "*"
 autopep8 = "*"
 jupyter = "*"
+ipython = ">=6"
 pip = "^21.0.1"
 
 
