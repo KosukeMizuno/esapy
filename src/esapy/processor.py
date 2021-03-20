@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from os import PathLike
 from pathlib import Path
 import shutil
 import tempfile
@@ -866,7 +867,26 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # post / patch
         post_number = self.get_post_number()
-        if post_number is None or self.args['post_mode'] == 'new':
+        # auto ==> post_num is None ==> new
+        #      ==> post_num is not None ==> filename matched ==> patch
+        #      ==> post_num is not None ==> filename not matched ==> new
+        # new ==> new
+        if self.args['post_mode'] == 'new':
+            logger.info('Post mode: new')
+            mode_new = True
+        else:
+            if post_number is None:
+                logger.info('Post mode: auto ==> unuploaded file ==> newly uploading ...')
+                mode_new = True
+            else:
+                if self.is_fn_matched():
+                    logger.info('Post mode: auto ==> already uploaded file, filename matched ==> patching the post...')
+                    mode_new = False
+                else:
+                    logger.info('Post mode: auto ==> already uploaded file, filename unmatched ==> newly uploading ...')
+                    mode_new = True
+
+        if mode_new:
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = create_post(md_body,
                                         name=info_dict['name'],
@@ -893,6 +913,7 @@ class IpynbProcessor(EsapyProcessorBase):
         self.nbjson['metadata']['esapy']['post_info'] = self.post_info
         self.nbjson['metadata']['esapy']['post_info'].pop('body_html')  # clear body, because body is generally large but didn't be used,
         self.nbjson['metadata']['esapy']['post_info'].pop('body_md')
+        self.nbjson['metadata']['esapy']['filename'] = self.path_input.name
         self.result_upload = self.is_uploaded()
 
         with self.path_ipynb.open('w', encoding='utf-8') as f:
@@ -928,12 +949,21 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def get_post_number(self):
         try:
+            logger.debug('Post number in metadata: {%%d}'.format(self.nbjson['metadata']['esapy']['post_info']['number']))
             return self.nbjson['metadata']['esapy']['post_info']['number']
         except KeyError:
             return None
 
     def is_uploaded(self):
         return self.get_post_number() is not None
+
+    def is_fn_matched(self):
+        try:
+            logger.debug('Previous filename: {%s}'.format(self.nbjson['metadata']['esapy']['filename']))
+            logger.debug('Current filename: {%s}'.format(self.path_input.name))
+            self.nbjson['metadata']['esapy']['filename'] == self.path_input.name
+        except KeyError:
+            return False
 
     def gather_post_info(self):
         '''gathering informatin for create/update post
