@@ -30,21 +30,22 @@ def get_team_stats(token=None, url=None, proxy=None):
 
     # get metadata
     payload = {'access_token': token,
-               'Content-Length': '',
-               'checkServices': 'mongo',
-               'strictly': False}
+               'checkServices': ['mongo', 'search'],
+               'strictly': True}
 
     res = requests.get(url + '/healthcheck', data=payload)
-    print(res)
-
-    if res.status_code != 200:
-        logger.warning('Getting team statistics failed.')
-        raise RuntimeError('Getting team statistics failed.')
     logger.debug(res)
+    logger.debug(res.headers)
+    if res.status_code == 200:
+        logger.info('healthy')
+        print('growi system is healthy')
+    elif res.status_code == 503:
+        logger.warning('unhealty')
+    else:
+        raise RuntimeError('Getting team statistics failed.')
+    logger.debug(res.text)
 
-    d = res.json()
-    logger.debug(d)
-    return d
+    return res.text
 
 
 def upload_binary(filename, token=None, team=None, proxy=None):

@@ -89,7 +89,7 @@ def _command_stats_growi(token, url, args):
     try:
         st = api_growi.get_team_stats(token=token, url=url,
                                       proxy=args.proxy)
-        print(st)
+        # print(st)
     except RuntimeError as e:
         print('Failed: please check network settings (token, url, proxy)')
 
