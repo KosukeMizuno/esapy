@@ -12,8 +12,7 @@ import base64
 import hashlib
 import json
 
-from .api import upload_binary, create_post, patch_post, get_post
-from .loadrc import get_token_and_team
+from .api_growi import upload_binary, create_post, patch_post, get_post
 from .helper import get_version
 
 # logger

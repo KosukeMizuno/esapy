@@ -3,6 +3,7 @@
 /.vscode/
 
 # 
+*.pdf
 /trial/
 /dist/
 /src/*.egg-info/

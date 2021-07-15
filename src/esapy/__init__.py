@@ -15,6 +15,7 @@ try:
 
     def load_ipython_extension(ipython):
         ipython.register_magics(esapy_fold)
-
+except ModuleNotFoundError:
+    pass
 except NameError:  # This register decorator can be called in ipython context.
     pass

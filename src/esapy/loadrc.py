@@ -11,8 +11,14 @@ KEY_TOKEN = 'ESA_PYTHON_TOKEN'
 KEY_TEAM = 'ESA_PYTHON_TEAM'
 RCFILE = '.esapyrc'
 
+# esa > growi の優先順位で鍵を探す
+KEY_GROWI_URL = 'GROWI_URL'
+KEY_GROWI_TOKEN = 'GROWI_TOKEN'
+
 
 def _show_configuration():
+    logger.warning('growi version is not implemented yet.')
+
     logger.info('showing configurations')
     path_rc = _get_rcfilepath()
     print('configuration file, "%s": ' % str(path_rc))
@@ -32,7 +38,7 @@ def _show_configuration():
 
 
 def get_token_and_team(args):
-    """return tuple (token, team)
+    """return tuple (token, team, dest)
     """
     x = None
 
@@ -51,6 +57,12 @@ def get_token_and_team(args):
         logger.info('The token and teamname are set from rcfile.')
         return x
 
+    try:
+        x = (os.environ[KEY_GROWI_TOKEN], os.environ[KEY_GROWI_URL], 'growi')
+        return x
+    except KeyError:
+        raise KeyError('Environs for both of esa & growi are not found.')
+
     raise RuntimeError('Access token & team name were not found.  Please make $HOME/%s or set %s and %s.'
                        % (RCFILE, KEY_TOKEN, KEY_TEAM))
 
@@ -59,7 +71,7 @@ def _get_token_from_args(args):
     token, team = args.token, args.team
 
     if token is not None and team is not None:
-        return token, team
+        return token, team, 'esa'
     else:
         logger.debug('Getting token from args failed.')
         return None
@@ -67,7 +79,7 @@ def _get_token_from_args(args):
 
 def _get_token_from_environ():
     try:
-        return os.environ[KEY_TOKEN], os.environ[KEY_TEAM]
+        return os.environ[KEY_TOKEN], os.environ[KEY_TEAM], 'esa'
     except KeyError:
         logger.debug('Getting token from environ failed.')
         return None
@@ -96,7 +108,7 @@ def _get_token_from_rcfile():
 
     y = _load_rcfile()
     try:
-        x = y['token'], y['team']
+        x = y['token'], y['team'], 'esa'
     except KeyError:
         logger.debug('Getting token from rcfile failed.')
 
