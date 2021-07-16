@@ -45,9 +45,9 @@ def get_team_stats(token=None, url=None, proxy=None):
         logger.warning('unhealty')
     else:
         raise RuntimeError('Getting team statistics failed.')
-    logger.debug(res.text)
+    logger.debug(res.json())
 
-    return res.text
+    return res.json()
 
 
 def upload_binary(filename, token=None, url=None, proxy=None):
@@ -56,13 +56,15 @@ def upload_binary(filename, token=None, url=None, proxy=None):
     logger.info('  filesize: %d' % path_bin.stat().st_size)
 
     _set_proxy(proxy)
-    payload = {'access_token': token}
+    params = {'access_token': token}
 
     # upload file
     logger.info('Posting binary...')
     with path_bin.open('rb') as imgfile:
+        payload = {}
         payload['file'] = (path_bin.name, imgfile, mimetypes.guess_type(path_bin))
-        res = requests.post(url + '/attachments.add', params=payload)
+        res = requests.post(url + '/_api/v3/attachments.add/',
+                            params=params, data=payload)
     logger.debug(res.headers)
 
     if res.status_code != 200:
@@ -84,7 +86,7 @@ def get_post(page_id, token=None, url=None, proxy=None):
                'page_id': page_id,
                }
 
-    res = requests.post(url + '/pages.get',
+    res = requests.post(url + '/_api/v3/pages.get',
                         data=json.dumps(payload))
     logger.debug(res)
 
@@ -112,8 +114,8 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
                'grant': 1  # なにこれ？ とりあえず1にしておいたけどドキュメントがない
                }
 
-    res = requests.post(url + '/create',
-                        data=json.dumps(payload))
+    res = requests.post(url + '/_api/v3/pages/create',
+                        params=json.dumps(payload))
     logger.debug(res)
     logger.debug(res.headers)
 
@@ -144,8 +146,9 @@ def patch_post(page_id, body_md, token=None, url=None, proxy=None):
                'grant': 1  # なにこれ？ とりあえず1にしておいたけどドキュメントがない
                }
 
-    res = requests.post(url + '/pages.update',
-                        data=json.dumps(payload))
+    res = requests.post(url + '/_api/v3/pages.update',
+                        data=json.dumps(payload),
+                        )
     logger.debug(res)
 
     if res.status_code != 200:
