@@ -29,17 +29,19 @@ requests = "*"
 gitpython = "*"
 
 
-
 [tool.poetry.dev-dependencies]
+pytest = "*"
 pydocstyle = "*"
 pycodestyle = "*"
 autopep8 = "*"
 jupyter = "*"
 ipython = ">=6"
-pip = "^21.0.1"
-
 
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

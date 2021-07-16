@@ -114,7 +114,7 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
                'grant': 1  # なにこれ？ とりあえず1にしておいたけどドキュメントがない
                }
 
-    res = requests.post(url + '/_api/v3/pages/create',
+    res = requests.post(url + '/_api/v3/pages.create',
                         params=json.dumps(payload))
     logger.debug(res)
     logger.debug(res.headers)
