@@ -35,7 +35,7 @@ def get_team_stats(token=None, url=None, proxy=None):
                'checkServices': ['mongo', 'search'],
                'strictly': True}
 
-    res = requests.get(url + '/healthcheck', data=json.dumps(payload))
+    res = requests.get(url + '/_api/v3/healthcheck', params=json.dumps(payload))
     logger.debug(res)
     logger.debug(res.headers)
     if res.status_code == 200:
@@ -61,8 +61,9 @@ def upload_binary(filename, token=None, url=None, proxy=None):
     # upload file
     logger.info('Posting binary...')
     with path_bin.open('rb') as imgfile:
-        payload['file'] = imgfile
-        res = requests.post(url + '/attachments.add', data=payload)
+        payload['file'] = (path_bin.name, imgfile, mimetypes.guess_type(path_bin))
+        res = requests.post(url + '/attachments.add', params=payload)
+    logger.debug(res.headers)
 
     if res.status_code != 200:
         logger.warning('Upload failed, %s' % str(path_bin))
@@ -114,6 +115,7 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
     res = requests.post(url + '/create',
                         data=json.dumps(payload))
     logger.debug(res)
+    logger.debug(res.headers)
 
     if res.status_code == 409:
         raise RuntimeError('Page path is already existed. Retry with different name.')

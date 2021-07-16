@@ -58,7 +58,10 @@ def get_token_and_team(args):
         return x
 
     try:
-        x = (os.environ[KEY_GROWI_TOKEN], os.environ[KEY_GROWI_URL], 'growi')
+        url = os.environ[KEY_GROWI_URL]
+        if url[-1] == '/':
+            url = url[:-1]  # 最後の / は除去
+        x = (os.environ[KEY_GROWI_TOKEN], url, 'growi')
         return x
     except KeyError:
         raise KeyError('Environs for both of esa & growi are not found.')

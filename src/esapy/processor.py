@@ -935,14 +935,14 @@ class IpynbProcessor(EsapyProcessorBase):
         if post_number is None or self.args['post_mode'] == 'new':
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = api_growi.create_post(md_body,
-                                                  name=info_dict['name'],
+                                                  name=info_dict.get('name', self.path_input.name),
                                                   token=self.args['token'],
                                                   url=self.args['url'],
                                                   proxy=self.args['proxy'])
         else:
             logger.info('This file has been already uploaded. ==> patch the post')
             post_url, res = api_growi.patch_post(post_number, md_body,
-                                                 name=info_dict['name'],
+                                                 name=info_dict.get('name', self.path_input.name),
                                                  token=self.args['token'],
                                                  url=self.args['url'],
                                                  proxy=self.args['proxy'])
