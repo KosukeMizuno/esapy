@@ -34,8 +34,11 @@ def command_up(args):
     args_dict = dict(vars(args))
     token, team, dest = get_token_and_team(args)
     args_dict['token'] = token
-    args_dict['team'] = team
     args_dict['dest'] = dest
+    if dest == 'esa':
+        args_dict['team'] = team
+    elif dest == 'growi':
+        args_dict['url'] = team
 
     # process start
     browser_flg = False  # flag to open browser after uploading body

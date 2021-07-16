@@ -12,7 +12,8 @@ import base64
 import hashlib
 import json
 
-from .api_growi import upload_binary, create_post, patch_post, get_post
+
+from . import api_esa, api_growi
 from .helper import get_version
 
 # logger
@@ -545,6 +546,8 @@ class IpynbProcessor(EsapyProcessorBase):
         if 'esapy' not in self.nbjson['metadata']:
             self.nbjson['metadata']['esapy'] = {}
             logger.debug('Notebook metadata initialized.')
+        if 'dest' not in self.nbjson['metadata']['esapy']:
+            self.nbjson['metadata']['esapy']['dest'] = self.args['dest']
         if 'post_info' not in self.nbjson['metadata']['esapy']:
             self.nbjson['metadata']['esapy']['post_info'] = {}
             logger.debug('Notebook previous post_info initialized.')
@@ -799,11 +802,20 @@ class IpynbProcessor(EsapyProcessorBase):
         h = self._get_sha256(path_img)
 
         if h not in d:  # unuploaded image
-            url, _ = upload_binary(path_img,
-                                   token=self.args['token'],
-                                   team=self.args['team'],
-                                   proxy=self.args['proxy'])
-            d[h] = url  # record url and sha256
+            if self.args['dest'] == 'esa':
+                url, _ = api_esa.upload_binary(path_img,
+                                               token=self.args['token'],
+                                               team=self.args['team'],
+                                               proxy=self.args['proxy'])
+                d[h] = url  # record url and sha256
+            elif self.args['dest'] == 'growi':
+                url, _ = api_growi.upload_binary(path_img,
+                                                 token=self.args['token'],
+                                                 url=self.args['url'],
+                                                 proxy=self.args['proxy'])
+                d[h] = url  # record url and sha256
+            else:
+                raise RuntimeError('invalid dest.')
 
         return d[h]
 
@@ -848,10 +860,18 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # upload ipynb itself and insert link
         try:
-            ipynb_url, _ = upload_binary(self.path_input,
-                                         token=self.args['token'],
-                                         team=self.args['team'],
-                                         proxy=self.args['proxy'])
+            if self.args['dest'] == 'esa':
+                ipynb_url, _ = api_esa.upload_binary(self.path_input,
+                                                     token=self.args['token'],
+                                                     team=self.args['team'],
+                                                     proxy=self.args['proxy'])
+            elif self.args['dest'] == 'growi':
+                ipynb_url, _ = api_growi.upload_binary(self.path_input,
+                                                       token=self.args['token'],
+                                                       url=self.args['url'],
+                                                       proxy=self.args['proxy'])
+            else:
+                raise RuntimeError('invalid dest.')
 
             s_link = 'ipynb file -> [{:s}]({:s})\n\n'.format(str(self.path_input), ipynb_url)
             md_body = s_link + md_body
@@ -864,29 +884,12 @@ class IpynbProcessor(EsapyProcessorBase):
         md_body = msg_warnforedit + md_body
 
         # post / patch
-        post_number = self.get_post_number()
-        if post_number is None or self.args['post_mode'] == 'new':
-            logger.info('This file has not been uploaded before. ==> create new post')
-            post_url, res = create_post(md_body,
-                                        name=info_dict['name'],
-                                        tags=info_dict['tags'],
-                                        category=info_dict['category'],
-                                        wip=info_dict['wip'],
-                                        message=info_dict['message'],
-                                        token=self.args['token'],
-                                        team=self.args['team'],
-                                        proxy=self.args['proxy'])
+        if self.args['dest'] == 'esa':
+            post_url, res = self._create_or_patch_post_esa(md_body, info_dict)
+        elif self.args['dest'] == 'growi':
+            post_url, res = self._create_or_patch_post_growi(md_body, info_dict)
         else:
-            logger.info('This file has been already uploaded. ==> patch the post')
-            post_url, res = patch_post(post_number, md_body,
-                                       name=info_dict['name'],
-                                       tags=info_dict['tags'],
-                                       category=info_dict['category'],
-                                       wip=info_dict['wip'],
-                                       message=info_dict['message'],
-                                       token=self.args['token'],
-                                       team=self.args['team'],
-                                       proxy=self.args['proxy'])
+            raise RuntimeError('invalid dest')
 
         self.post_info = res.json()
         self.nbjson['metadata']['esapy']['post_info'] = self.post_info
@@ -899,6 +902,52 @@ class IpynbProcessor(EsapyProcessorBase):
             logger.info('Intermediate ipynb file has been saved.')
 
         return post_url
+
+    def _create_or_patch_post_esa(self, md_body, info_dict):
+        post_number = self.get_post_number()
+        if post_number is None or self.args['post_mode'] == 'new':
+            logger.info('This file has not been uploaded before. ==> create new post')
+            post_url, res = api_esa.create_post(md_body,
+                                                name=info_dict['name'],
+                                                tags=info_dict['tags'],
+                                                category=info_dict['category'],
+                                                wip=info_dict['wip'],
+                                                message=info_dict['message'],
+                                                token=self.args['token'],
+                                                team=self.args['team'],
+                                                proxy=self.args['proxy'])
+        else:
+            logger.info('This file has been already uploaded. ==> patch the post')
+            post_url, res = api_esa.patch_post(post_number, md_body,
+                                               name=info_dict['name'],
+                                               tags=info_dict['tags'],
+                                               category=info_dict['category'],
+                                               wip=info_dict['wip'],
+                                               message=info_dict['message'],
+                                               token=self.args['token'],
+                                               team=self.args['team'],
+                                               proxy=self.args['proxy'])
+
+        return post_url, res
+
+    def _create_or_patch_post_growi(self, md_body, info_dict):
+        post_number = self.get_post_number()
+        if post_number is None or self.args['post_mode'] == 'new':
+            logger.info('This file has not been uploaded before. ==> create new post')
+            post_url, res = api_growi.create_post(md_body,
+                                                  name=info_dict['name'],
+                                                  token=self.args['token'],
+                                                  url=self.args['url'],
+                                                  proxy=self.args['proxy'])
+        else:
+            logger.info('This file has been already uploaded. ==> patch the post')
+            post_url, res = api_growi.patch_post(post_number, md_body,
+                                                 name=info_dict['name'],
+                                                 token=self.args['token'],
+                                                 url=self.args['url'],
+                                                 proxy=self.args['proxy'])
+
+        return post_url, res
 
     def save(self):
         '''動作モードに応じて出力されたmdファイルを保存する
@@ -927,7 +976,12 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def get_post_number(self):
         try:
-            return self.nbjson['metadata']['esapy']['post_info']['number']
+            if self.args['dest'] == 'esa':
+                return self.nbjson['metadata']['esapy']['post_info']['number']
+            elif self.args['dest'] == 'growi':
+                return self.nbjson['metadata']['esapy']['post_info']['_id']
+            else:
+                raise RuntimeError('invalid dest')
         except KeyError:
             return None
 
@@ -937,16 +991,53 @@ class IpynbProcessor(EsapyProcessorBase):
     def gather_post_info(self):
         '''gathering informatin for create/update post
         '''
+        dest = self.nbjson['metadata']['esapy'].get('dest', 'esa')
+        if dest == 'esa':
+            return self._gather_post_info_esa()
+        elif dest == 'growi':
+            return self._gater_post_info_growi()
+
+        raise RuntimeError('invalid dest is found.')
+
+    def _gater_post_info_growi(self):
+        '''gathering informatin for create/update post
+        '''
+        info_prev_metadata = self.nbjson['metadata']['esapy']['post_info']  # post_info written in metadata
+        number = info_prev_metadata.get('_id', None)
+        info_prev = {}
+        if number is not None:
+            logger.info('post_number is not None. -> checking post/{:d} ...'.format(number))
+            try:
+                info_prev = api_growi.get_post(number,
+                                               token=self.args['token'],
+                                               url=self.args['url'],
+                                               proxy=self.args['proxy'])
+                logger.info('getting post/{:d} was succeeded.'.format(number))
+            except RuntimeError as e:
+                logger.info('getting post/{:d} was failed. -> clearing post_number to set as None.'.format(number))
+                info_prev = info_prev_metadata
+                info_prev['_id'] = None
+        else:
+            info_prev = info_prev_metadata
+        logger.info('info_prev has been gathered.')
+        logger.debug(info_prev)
+        d = {}  # dict to return
+
+        return d
+
+    def _gather_post_info_esa(self):
+        '''gathering informatin for create/update post
+        '''
         info_prev_metadata = self.nbjson['metadata']['esapy']['post_info']  # post_info written in metadata
         number = info_prev_metadata['number']
         info_prev = {}
         if number is not None:
             logger.info('post_number is not None. -> checking post/{:d} ...'.format(number))
             try:
-                info_prev = get_post(number,
-                                     token=self.args['token'],
-                                     team=self.args['team'],
-                                     proxy=self.args['proxy'])
+                info_prev = api_esa.get_post(number,
+                                             token=self.args['token'],
+                                             team=self.args['team'],
+                                             proxy=self.args['proxy'])
                 logger.info('getting post/{:d} was succeeded.'.format(number))
             except RuntimeError as e:
                 logger.info('getting post/{:d} was failed. -> clearing post_number to set as None.'.format(number))
