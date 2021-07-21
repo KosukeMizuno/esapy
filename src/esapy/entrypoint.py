@@ -73,7 +73,10 @@ def command_up(args):
 
     # if succeeded, open browser in edit page
     if browser_flg:
-        edit_url = post_url + '/edit'
+        if dest == 'esa':
+            edit_url = post_url + '/edit'
+        elif dest == 'growi':
+            edit_url = post_url + '#edit'
         logger.info('edit page={:s}'.format(edit_url))
         print('edit page URL ... {:s}'.format(edit_url))
         webbrowser.open(edit_url, new=2)
