@@ -31,21 +31,15 @@ def get_team_stats(token=None, url=None, proxy=None):
     _set_proxy(proxy)
 
     # get metadata
-    payload = {'access_token': token,
-               'checkServices': ['mongo', 'search'],
-               'strictly': True}
-
-    res = requests.get(url + '/_api/v3/healthcheck', params=json.dumps(payload))
+    res = requests.get(url + '/_api/v3/statistics/user',
+                       params=dict(access_token=token))
     logger.debug(res)
     logger.debug(res.headers)
     if res.status_code == 200:
-        logger.info('healthy')
-        print('growi system is healthy')
-    elif res.status_code == 503:
-        logger.warning('unhealty')
+        pass
     else:
         raise RuntimeError('Getting team statistics failed.')
-    logger.debug(res.json())
+    print(res.json())
 
     return res.json()
 
