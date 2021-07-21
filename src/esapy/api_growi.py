@@ -52,11 +52,13 @@ def upload_binary(filename, token=None, url=None, proxy=None):
 
     _set_proxy(proxy)
 
+    page_id = get_post_by_path('/user/kosuke', token, url, proxy)['_id']
+
     # upload file
     logger.info('Posting binary...')
     with path_bin.open('rb') as imgfile:
         res = requests.post(url + '/_api/attachments.add',
-                            data=dict(page_id=None,
+                            data=dict(page_id=page_id,
                                       access_token=token),
                             files=dict(file=(path_bin.name,
                                              imgfile,
@@ -81,9 +83,32 @@ def get_post(page_id, token=None, url=None, proxy=None):
     _set_proxy(proxy)
     payload = {'access_token': token,
                'page_id': page_id}
-    res = requests.get(url + '/_api/v3/pages.get',
+    res = requests.get(url + '/_api/pages.get',
                        params=payload)
     logger.debug(res)
+
+    if res.status_code != 200:
+        logger.warning('Getting post failed.')
+        raise RuntimeError('Getting post failed.')
+
+    d = res.json()
+    logger.debug(d)
+
+    return d['page']
+
+
+def get_post_by_path(pagepath, token=None, url=None, proxy=None):
+    logger.info('Getting post/{:}'.format(pagepath))
+
+    _set_proxy(proxy)
+
+    payload = {'access_token': token,
+               'path': pagepath}
+    res = requests.get(url + '/_api/pages.get',
+                       params=payload)
+    logger.debug(res)
+    logger.debug(res.headers)
+    # logger.debug(res.text)
 
     if res.status_code != 200:
         logger.warning('Getting post failed.')
@@ -119,8 +144,8 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
     logger.info('New post was successfully created.')
 
     d = res.json()
-    logger.debug(d['page'])
-    pageurl = url + '/' + d['page']['path']
+    logger.debug(d['data']['page'])
+    pageurl = url + '/' + d['data']['page']['path']
     logger.info('URL of the created post: %s' % pageurl)
 
     return pageurl, res
@@ -129,7 +154,6 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
 def patch_post(page_id, body_md, token=None, url=None, proxy=None):
     logger.info('Updating post')
 
-    # getting page data because latest revision_id is required to pages.update
     page_dat = get_post(page_id, token, url, proxy)
 
     # post
