@@ -6,6 +6,7 @@ import mimetypes
 import requests
 import json
 import uuid
+from urllib.parse import quote
 import hashlib
 
 # logger
@@ -128,17 +129,17 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
 def patch_post(page_id, body_md, token=None, url=None, proxy=None):
     logger.info('Updating post')
 
+    # getting page data because latest revision_id is required to pages.update
+    page_dat = get_post(page_id, token, url, proxy)
+
     # post
     _set_proxy(proxy)
-    rev = hashlib.sha256(uuid.uuid4()).hexdigest()
     payload = {'access_token': token,
                'body': body_md,
                'page_id': page_id,
-               'revision_id': rev,
-               'grant': 1  # なにこれ？ とりあえず1にしておいたけどドキュメントがない
+               'revision_id': page_dat['revision']['_id']
                }
-
-    res = requests.post(url + '/_api/v3/pages.update',
+    res = requests.post(url + f'/_api/v3/pages.update?access_token={quote(token)}',
                         data=json.dumps(payload),
                         )
     logger.debug(res)
