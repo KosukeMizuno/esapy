@@ -50,15 +50,17 @@ def upload_binary(filename, token=None, url=None, proxy=None):
     logger.info('  filesize: %d' % path_bin.stat().st_size)
 
     _set_proxy(proxy)
-    params = {'access_token': token}
 
     # upload file
     logger.info('Posting binary...')
     with path_bin.open('rb') as imgfile:
-        payload = {}
-        payload['file'] = (path_bin.name, imgfile, mimetypes.guess_type(path_bin))
-        res = requests.post(url + '/_api/v3/attachments.add/',
-                            params=params, data=payload)
+        res = requests.post(url + '/_api/attachments.add',
+                            data=dict(page_id=None,
+                                      access_token=token),
+                            files=dict(file=(path_bin.name,
+                                             imgfile,
+                                             mimetypes.guess_type(path_bin)[0]))
+                            )
     logger.debug(res.headers)
 
     if res.status_code != 200:
