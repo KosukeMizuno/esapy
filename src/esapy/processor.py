@@ -624,6 +624,8 @@ class IpynbProcessor(EsapyProcessorBase):
                 is_display_math = True
             elif md[i] == '```\n':
                 is_display_math = False
+            elif md[i] == '$$\n':
+                is_display_math = not is_display_math
             else:
                 if is_display_math:
                     continue
@@ -638,7 +640,8 @@ class IpynbProcessor(EsapyProcessorBase):
                         lst[idx] = re.sub(r'(?<!\\)\\{:s}'.format(c), r'\\\\{:s}'.format(c), lst[idx])
                     lst[idx] = re.sub(r'\*', r'\\ast', lst[idx])  # '*'   -> '\ast'
                     lst[idx] = re.sub(r"(?<!\^)'", r'^\\prime', lst[idx])  # "'"   -> '^\prime'
-                    lst[idx] = re.sub(r'(?<!\\)_', '\\_', lst[idx])  # 'a_i' -> 'a\_i'
+                    if self.args['dest'] == 'esa':
+                        lst[idx] = re.sub(r'(?<!\\)_', '\\_', lst[idx])  # 'a_i' -> 'a\_i'
 
                 md[i] = '$'.join(lst)
 
