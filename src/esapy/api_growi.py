@@ -79,11 +79,9 @@ def get_post(page_id, token=None, url=None, proxy=None):
     # post
     _set_proxy(proxy)
     payload = {'access_token': token,
-               'page_id': page_id,
-               }
-
-    res = requests.post(url + '/_api/v3/pages.get',
-                        data=json.dumps(payload))
+               'page_id': page_id}
+    res = requests.get(url + '/_api/v3/pages.get',
+                       params=payload)
     logger.debug(res)
 
     if res.status_code != 200:
