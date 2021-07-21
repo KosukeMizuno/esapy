@@ -13,40 +13,30 @@ Description in Japanese: <https://esa-pages.io/p/sharing/14661/posts/184/d983bd2
 
 ## INSTALATION
 
-1. Install pandoc
-
-    ```shell
-    $sudo apt install pandoc
-    ```
-
-    This package call nbconvert internally.
-
 1. Install package
 
     ```shell
     $pip install esapy
     ```
 
-1. generate esa.io token with read/write permission.
+1. set credentials (for esa.io)
+  1. generate esa.io token with read/write permission.
+  1. make configuration in your environment variables
+      Environment variables: `ESA_PYTHON_TOKEN`, `ESA_PYTHON_TEAM`.
+      You can check your token using `esa config` from command line. 
 
-1. make configuration file in your home directory (`~/.esapyrc`).
-
-    ```YAML: ~/.esapyrc
-    token: your_token
-    team: your_team
-    ```
-
-    - You can set them as environment variables: `ESA_PYTHON_TOKEN`, `ESA_PYTHON_TEAM`.
-    - Environment variables are prior to `.esapyrc` file.
-    - You can check your token using `esa config` from command line. 
-
+1. set credentials (for growi)
+  1. generate token
+  1. set environment variables
+    - `GROWI_URL`
+    - `GROWI_TOKEN`
 
 
 ## HOW TO USE
 
 1. Prepare .ipynb file
 
-1. Convert to markdown and upload images.
+1. Upload your notebook
 
     ```shell
     $ esa up target.ipynb
@@ -86,7 +76,9 @@ This package registers following command line tools.
   - show notebook list in the directory
   - `<dirname>` can be abbreveated. Default is the current working directory.
 
-### config file
+### (deprecated) config file
+
+Use environment variable instead of config file.
 
 The config file (`~/.esapyrc`) should be written in yaml format.
 An example is shown below.
@@ -112,6 +104,12 @@ alias esafu='esa up --no-browser "$(esa ls | fzf | sed -r "s/(.+)\\| (.+)/\\2/")
 1. cd repo directory
 1. `poetry install`
 1. `git checkout develop`
+
+
+## For Growi adminitorator
+
+Allow `details` tag and `open` attribute by configuration.
+Allow guest user access by security configuration. Some APIs have bug related to authentication.
 
 
 ## LICENSE
