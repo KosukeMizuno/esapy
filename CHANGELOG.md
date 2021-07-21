@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 2.0.0 - [2021-07-22]
+### Added
+- New feature: uploading to GROWI wiki system.
+
 ## 1.3.6 - [2021-03-15]
 ### Added
 - Insert warnings for local editing.
