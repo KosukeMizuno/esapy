@@ -13,6 +13,8 @@ import hashlib
 from logging import getLogger
 logger = getLogger(__name__)
 
+from .loadrc import KEY_GROWI_USERNAME
+
 
 def _set_proxy(proxy):
     if proxy is None:
@@ -24,6 +26,10 @@ def _set_proxy(proxy):
     logger.debug('HTTP_PROXY={:s}'.format(os.environ['HTTP_PROXY']))
     os.environ['HTTPS_PROXY'] = proxy
     logger.debug('HTTPS_PROXY={:s}'.format(os.environ['HTTPS_PROXY']))
+
+
+def _get_growi_username():
+    return os.environ[KEY_GROWI_USERNAME]
 
 
 def get_team_stats(token=None, url=None, proxy=None):
@@ -52,7 +58,7 @@ def upload_binary(filename, token=None, url=None, proxy=None):
 
     _set_proxy(proxy)
 
-    page_id = get_post_by_path('/user/kosuke', token, url, proxy)['_id']
+    page_id = get_post_by_path('/user/' + _get_growi_username(), token, url, proxy)['_id']
 
     # upload file
     logger.info('Posting binary...')
@@ -131,7 +137,7 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
 
     payload = {'access_token': token,
                'body': body_md,
-               'path': '/user/bot/' + name}
+               'path': '/user/' + _get_growi_username() + '/' + name}
     res = requests.post(url + '/_api/v3/pages/',
                         data=payload)
     logger.debug(res)

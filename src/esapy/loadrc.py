@@ -13,6 +13,7 @@ RCFILE = '.esapyrc'
 
 # esa > growi の優先順位で鍵を探す
 KEY_GROWI_URL = 'GROWI_URL'
+KEY_GROWI_USERNAME = 'GROWI_USERNAME'
 KEY_GROWI_TOKEN = 'GROWI_TOKEN'
 
 
@@ -35,6 +36,7 @@ def _show_configuration():
     print('')
     print('environtme variables for growi:')
     print('  %s=%s' % (KEY_GROWI_TOKEN, os.environ.get(KEY_GROWI_TOKEN, '')))
+    print('  %s=%s' % (KEY_GROWI_USERNAME, os.environ.get(KEY_GROWI_USERNAME, '')))
     print('  %s=%s' % (KEY_GROWI_URL, os.environ.get(KEY_GROWI_URL, '')))
     print('')
 
@@ -61,6 +63,7 @@ def get_token_and_team(args):
 
     try:
         url = os.environ[KEY_GROWI_URL]
+        _ = os.environ[KEY_GROWI_USERNAME]  # ここでは使用しないけど、エラーチェックのために読んでおく（クソハックなので直したいけどめんどい）
         if url[-1] == '/':
             url = url[:-1]  # 最後の / は除去
         x = (os.environ[KEY_GROWI_TOKEN], url, 'growi')
