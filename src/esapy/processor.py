@@ -603,17 +603,19 @@ class IpynbProcessor(EsapyProcessorBase):
         md.extend(['\n'])
 
         # マークダウン中の $$~$$ を ```math~``` にする
-        count_ddoller = 0
-        for i in range(len(md)):
-            if md[i] != '$$\n':
-                continue
+        # esa.ioには必要だがgrowiには不要
+        if self.args['dest'] == 'esa':
+            count_ddoller = 0
+            for i in range(len(md)):
+                if md[i] != '$$\n':
+                    continue
 
-            count_ddoller += 1
+                count_ddoller += 1
 
-            if count_ddoller % 2 == 1:
-                md[i] = '```math\n'
-            else:
-                md[i] = '```\n'
+                if count_ddoller % 2 == 1:
+                    md[i] = '```math\n'
+                else:
+                    md[i] = '```\n'
 
         # マークダウン中の inline math を `\` でエスケープ
         is_display_math = False
