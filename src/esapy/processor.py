@@ -890,11 +890,13 @@ class IpynbProcessor(EsapyProcessorBase):
             post_url, res = self._create_or_patch_post_growi(md_body, info_dict)
         else:
             raise RuntimeError('invalid dest')
+        logger.info('Created/patched post')
 
         self.post_info = res.json()
         self.nbjson['metadata']['esapy']['post_info'] = self.post_info
         try:
-            self.nbjson['metadata']['esapy']['post_info'].pop('body_html')  # clear body, because body is generally large but didn't be used,
+            # clear body, because body is generally large but didn't be used,
+            self.nbjson['metadata']['esapy']['post_info'].pop('body_html')
             self.nbjson['metadata']['esapy']['post_info'].pop('body_md')
         except KeyError:
             logger.info('metadata body was not found. ==> skipped.')
@@ -982,7 +984,7 @@ class IpynbProcessor(EsapyProcessorBase):
             if self.args['dest'] == 'esa':
                 return self.nbjson['metadata']['esapy']['post_info']['number']
             elif self.args['dest'] == 'growi':
-                return self.nbjson['metadata']['esapy']['post_info']['_id']
+                return self.nbjson['metadata']['esapy']['post_info']['data']['page']['_id']
             else:
                 raise RuntimeError('invalid dest')
         except KeyError:

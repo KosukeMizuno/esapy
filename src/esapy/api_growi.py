@@ -77,7 +77,7 @@ def upload_binary(filename, token=None, url=None, proxy=None):
 
 
 def get_post(page_id, token=None, url=None, proxy=None):
-    logger.info('Getting post/{:d}'.format(page_id))
+    logger.info('Getting post/{:}'.format(page_id))
 
     # post
     _set_proxy(proxy)
@@ -151,30 +151,31 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
     return pageurl, res
 
 
-def patch_post(page_id, body_md, token=None, url=None, proxy=None):
-    logger.info('Updating post')
+def patch_post(page_id, body_md, name, token=None, url=None, proxy=None):
+    logger.info('Updating post: {:}'.format(page_id))
 
     page_dat = get_post(page_id, token, url, proxy)
 
     # post
     _set_proxy(proxy)
-    payload = {'access_token': token,
-               'body': body_md,
+    payload = {'body': body_md,
                'page_id': page_id,
                'revision_id': page_dat['revision']['_id']
                }
-    res = requests.post(url + f'/_api/v3/pages.update?access_token={quote(token)}',
-                        data=json.dumps(payload),
+    logger.debug(payload)
+    res = requests.post(url + f'/_api/pages.update?access_token={quote(token)}',
+                        data=payload,
                         )
     logger.debug(res)
 
     if res.status_code != 200:
         raise RuntimeError('Create post failed.')
-    logger.info('New post was successfully created.')
 
     d = res.json()
+    logger.debug(d)
     logger.debug(d['page'])
     pageurl = url + '/' + d['page']['path']
-    logger.info('URL of the created post: %s' % pageurl)
 
+    logger.info('New post was successfully created.')
+    logger.info('URL of the created post: %s' % pageurl)
     return pageurl, res
