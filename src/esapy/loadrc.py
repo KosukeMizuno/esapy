@@ -17,8 +17,6 @@ KEY_GROWI_TOKEN = 'GROWI_TOKEN'
 
 
 def _show_configuration():
-    logger.warning('growi version is not implemented yet.')
-
     logger.info('showing configurations')
     path_rc = _get_rcfilepath()
     print('configuration file, "%s": ' % str(path_rc))
@@ -31,9 +29,13 @@ def _show_configuration():
     except FileNotFoundError as e:
         print('  rcFile not found.')
 
-    print('environment variables:')
+    print('environment variables for esa.io:')
     print('  %s=%s' % (KEY_TOKEN, os.environ.get(KEY_TOKEN, '')))
     print('  %s=%s' % (KEY_TEAM, os.environ.get(KEY_TEAM, '')))
+    print('')
+    print('environtme variables for growi:')
+    print('  %s=%s' % (KEY_GROWI_TOKEN, os.environ.get(KEY_GROWI_TOKEN, '')))
+    print('  %s=%s' % (KEY_GROWI_URL, os.environ.get(KEY_GROWI_URL, '')))
     print('')
 
 
