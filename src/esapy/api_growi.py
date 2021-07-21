@@ -102,14 +102,12 @@ def create_post(body_md, token=None, url=None, name=None, proxy=None):
 
     if name is None:
         raise RuntimeError('`name` is required.')
+
     payload = {'access_token': token,
                'body': body_md,
-               'path': '/user/bot/' + name,
-               'grant': 1  # なにこれ？ とりあえず1にしておいたけどドキュメントがない
-               }
-
-    res = requests.post(url + '/_api/v3/pages.create',
-                        params=json.dumps(payload))
+               'path': '/user/bot/' + name}
+    res = requests.post(url + '/_api/v3/pages/',
+                        data=payload)
     logger.debug(res)
     logger.debug(res.headers)
 
