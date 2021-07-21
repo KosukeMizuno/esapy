@@ -7,7 +7,8 @@ import sys
 
 from .processor import MarkdownProcessor, TexProcessor, IpynbProcessor
 from .loadrc import _show_configuration, get_token_and_team, RCFILE, KEY_TOKEN, KEY_TEAM
-from .api import get_team_stats
+from . import api_growi
+from . import api_esa
 from .helper import reset_ipynb, ls_dir_or_file, get_version
 
 # logger
@@ -31,9 +32,13 @@ def command_up(args):
 
     # set token & team
     args_dict = dict(vars(args))
-    token, team = get_token_and_team(args)
+    token, team, dest = get_token_and_team(args)
     args_dict['token'] = token
-    args_dict['team'] = team
+    args_dict['dest'] = dest
+    if dest == 'esa':
+        args_dict['team'] = team
+    elif dest == 'growi':
+        args_dict['url'] = team
 
     # process start
     browser_flg = False  # flag to open browser after uploading body
@@ -68,18 +73,37 @@ def command_up(args):
 
     # if succeeded, open browser in edit page
     if browser_flg:
-        edit_url = post_url + '/edit'
+        if dest == 'esa':
+            edit_url = post_url + '/edit'
+        elif dest == 'growi':
+            edit_url = post_url + '#edit'
         logger.info('edit page={:s}'.format(edit_url))
         print('edit page URL ... {:s}'.format(edit_url))
         webbrowser.open(edit_url, new=2)
 
 
 def command_stats(args):
-    token, team = get_token_and_team(args)
+    token, team, dest = get_token_and_team(args)
+    if dest == 'esa':
+        _command_stats_esa(token, team, dest)
+    elif dest == 'growi':
+        url = team
+        _command_stats_growi(token, url, args)
 
+
+def _command_stats_growi(token, url, args):
     try:
-        st = get_team_stats(token=token, team=team,
-                            proxy=args.proxy)
+        st = api_growi.get_team_stats(token=token, url=url,
+                                      proxy=args.proxy)
+        # print(st)
+    except RuntimeError as e:
+        print('Failed: please check network settings (token, url, proxy)')
+
+
+def _command_stats_esa(token, team, args):
+    try:
+        st = api_esa.get_team_stats(token=token, team=team,
+                                    proxy=args.proxy)
         print(st)
     except RuntimeError as e:
         print('Failed: please check network settings (token, team, proxy)')

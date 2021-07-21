@@ -3,10 +3,12 @@
 /.vscode/
 
 # 
+*.pdf
 /trial/
 /dist/
 /src/*.egg-info/
-/src/esapy/__pycache__/
+__pycache__/
+.pytest_cache
 
 # markdown
 .~*.md

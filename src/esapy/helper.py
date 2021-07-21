@@ -90,9 +90,16 @@ def ls_dir_or_file(filepath, use_fullpath=True, grid=True, recursive=True):
             lst.append((path_nb, False, None))
             return
 
-        n = j['metadata']['esapy'].get('post_info', {}).get('number', None)
+        try:
+            n = j['metadata']['esapy']['post_info']['number']
+        except KeyError:
+            try:
+                n = j['metadata']['esapy']['post_info']['page']['_id']
+            except KeyError:
+                n = ''
+
         if n is not None:
-            logger.info('  Post number={:d}'.format(n))
+            logger.info('  Post number={:}'.format(n))
             lst.append((path_nb, True, n))
         else:
             logger.info('  Unuploaded file.')
@@ -124,7 +131,7 @@ def ls_dir_or_file(filepath, use_fullpath=True, grid=True, recursive=True):
         print('-------------|------------')
 
     for path, is_uploaded, number in lst:
-        n = '{:>12d}'.format(number) if number is not None else ' ' * 11 + '.'
+        n = '{:>12}'.format(number) if number is not None else ' ' * 11 + '.'
         fn = str(path.absolute()) if use_fullpath else path.name
         g = '|' if grid else ''
         print('{:s} {:s} {:s}'.format(n, g, fn))
