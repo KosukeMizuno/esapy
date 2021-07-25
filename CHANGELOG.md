@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 - support for latex input with images
 - check publish status and error-handling
 
+## 2.0.1 - [2021-07-26]
+### Fixed
+- Any attached images can be uploaded. Previous version can treat only png image.
+- Update and patch notebook on growi.
+
+### Changed
+- project description
+
 ## 2.0.0 - [2021-07-22]
 ### Added
 - New feature: uploading to GROWI wiki system.

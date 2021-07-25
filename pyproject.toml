@@ -8,9 +8,9 @@ ignore = "E501,E266,E402"
 
 [tool.poetry]
 name = "esapy"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Kosuke Mizuno <dotmapu@gmail.com>"]
-description = "A python implementation of esa.io API"
+description = "Upload jupyter notebook for your wiki. Suported wiki: esa.io and growi."
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/KosukeMizuno/esapy"
