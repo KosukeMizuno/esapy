@@ -61,7 +61,7 @@ def upload_binary(filename, token=None, url=None, proxy=None):
     page_id = get_post_by_path('/user/' + _get_growi_username(), token, url, proxy)['_id']
 
     # upload file
-    logger.info('Posting binary...')
+    logger.info('Posting binary...{:}'.format(path_bin.name))
     with path_bin.open('rb') as imgfile:
         res = requests.post(url + '/_api/attachments.add',
                             data=dict(page_id=page_id,

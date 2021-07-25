@@ -648,13 +648,14 @@ class IpynbProcessor(EsapyProcessorBase):
         # attachment があったら抽出
         at_images = {}  # key=attachment:(xxx.png), value=file path
         for at_name, v in cell_md.get('attachments', {}).items():
-            path_at = self._save_encodedimage(v['image/png'])
+            img64 = list(v.values())[0]
+            path_at = self._save_encodedimage(img64)
             at_images[at_name] = path_at
 
         # attachment image を参照するimgタグがあったら抽出後のファイルパスで置き換え
         for i, l in enumerate(md):
             _l = l
-            matches = list(re.finditer(r'!\[(.*?)\]\(attachment:(.+\.png)\)', l))
+            matches = list(re.finditer(r'!\[(.*?)\]\(attachment:(.+?)\)', l))
             for m in matches[::-1]:
                 path_img = at_images.get(m.group(2), m.group(2))
                 _l = _l[:m.start()] \
@@ -663,9 +664,11 @@ class IpynbProcessor(EsapyProcessorBase):
             md[i] = _l
 
         # imgタグがあったらsha256からurlをゲットして、置き換え
+        # Note: ファイル名にカッコ()が入っていると正規表現に失敗する。
+        # TODO: regexパッケージを使えば入れ子のマッチ対処できるらしい
         for i, l in enumerate(md):
             _l = l
-            matches = list(re.finditer(r'!\[(.*?)\]\((.+\.png)\)', l))
+            matches = list(re.finditer(r'!\[(.*?)\]\((.+?)\)', l))
             for m in matches[::-1]:
                 fn = m.group(2)
                 if len(fn) >= 4 and fn[:4] == 'http':
@@ -890,8 +893,10 @@ class IpynbProcessor(EsapyProcessorBase):
 
         # post / patch
         if self.args['dest'] == 'esa':
+            logger.debug('create or patch post to esa')
             post_url, res = self._create_or_patch_post_esa(md_body, info_dict)
         elif self.args['dest'] == 'growi':
+            logger.debug('create or patch post to growi')
             post_url, res = self._create_or_patch_post_growi(md_body, info_dict)
         else:
             raise RuntimeError('invalid dest')
@@ -942,6 +947,7 @@ class IpynbProcessor(EsapyProcessorBase):
 
     def _create_or_patch_post_growi(self, md_body, info_dict):
         post_number = self.get_post_number()
+        logger.debug(post_number)
         if post_number is None or self.args['post_mode'] == 'new':
             logger.info('This file has not been uploaded before. ==> create new post')
             post_url, res = api_growi.create_post(md_body,
@@ -987,12 +993,17 @@ class IpynbProcessor(EsapyProcessorBase):
     def get_post_number(self):
         try:
             if self.args['dest'] == 'esa':
-                return self.nbjson['metadata']['esapy']['post_info']['number']
+                n = self.nbjson['metadata']['esapy']['post_info']['number']
+                logger.debug('post_number (esa): {:}'.format(n))
+                return n
             elif self.args['dest'] == 'growi':
-                return self.nbjson['metadata']['esapy']['post_info']['data']['page']['_id']
+                n = self.nbjson['metadata']['esapy']['post_info']['page']['_id']
+                logger.debug('post_number (growi): {:}'.format(n))
+                return n
             else:
                 raise RuntimeError('invalid dest')
         except KeyError:
+            logger.warn('Failed to getting post_number: treating as new post')
             return None
 
     def is_uploaded(self):
